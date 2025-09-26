@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Student Portal</title>
+    <link rel="stylesheet" href="../../admin.css">
+    <link rel="stylesheet" href="profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="toastContainer" aria-live="polite"></div>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-graduation-cap"></i> Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="../dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="../exams/exams.html"><i class="fas fa-calendar-alt"></i> Exam Timetable</a></li>
+                <li><a href="../seating/seating.html"><i class="fas fa-chair"></i> Seating Arrangement</a></li>
+                <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="profile.html" class="active"><i class="fas fa-user-circle"></i> Profile</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-user-circle"></i> Student Profile</h1>
+                <div class="user-info">
+                    <span id="currentDateTime"></span>
+                    <span>Student</span>
+                    <i class="fas fa-user-circle"></i>
+                    <button id="logoutBtn" class="btn btn-secondary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="profile-container">
+                    <!-- Profile Header -->
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="studentName">John Doe</h2>
+                            <p id="studentRollNumber">Roll Number: B1-123</p>
+                            <p id="studentSection">Section: B1</p>
+                        </div>
+                        <div class="profile-actions">
+                            <button id="editProfileBtn" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <div class="profile-content">
+                        <div class="profile-grid">
+                            <div class="profile-picture-section">
+                                <div class="profile-picture-container">
+                                    <div class="profile-picture-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="profile-picture-controls">
+                                    <button class="btn-upload-picture">
+                                        <i class="fas fa-upload"></i> Upload Picture
+                                    </button>
+                                    <button class="btn-remove-picture">
+                                        <i class="fas fa-trash"></i> Remove Picture
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="profile-details-section">
+                                <div class="details-section">
+                                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <label>Full Name</label>
+                                            <span id="fullName">John Doe</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Date of Birth</label>
+                                            <span id="dateOfBirth">15 Jan 2005</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Gender</label>
+                                            <span id="gender">Male</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Blood Group</label>
+                                            <span id="bloodGroup">O+</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <label>Email Address</label>
+                                            <span id="email">john.doe@example.com</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Phone Number</label>
+                                            <span id="phone">+1234567890</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Address</label>
+                                            <span id="address">123 Main Street, City, State, 12345</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <label>Roll Number</label>
+                                            <span id="rollNumber">B1-123</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Section</label>
+                                            <span id="section">B1</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Course</label>
+                                            <span id="course">Bachelor of Science</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Enrollment Date</label>
+                                            <span id="enrollmentDate">15 Aug 2023</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3><i class="fas fa-user-shield"></i> Emergency Contact</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <label>Contact Name</label>
+                                            <span id="emergencyContactName">Jane Doe</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Relationship</label>
+                                            <span id="emergencyRelationship">Mother</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Phone Number</label>
+                                            <span id="emergencyPhone">+1234567891</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Actions -->
+                    <div class="profile-actions-bottom">
+                        <button id="changePasswordBtn" class="btn btn-secondary">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                        <button id="downloadProfileBtn" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Download Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../utils.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>

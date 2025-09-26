@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seating Arrangement - Student Portal</title>
+    <link rel="stylesheet" href="../../admin.css">
+    <link rel="stylesheet" href="seating.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="toastContainer" aria-live="polite"></div>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-graduation-cap"></i> Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="../dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="../exams/exams.html"><i class="fas fa-calendar-alt"></i> Exam Timetable</a></li>
+                <li><a href="seating.html" class="active"><i class="fas fa-chair"></i> Seating Arrangement</a></li>
+                <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="../profile/profile.html"><i class="fas fa-user-circle"></i> Profile</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-chair"></i> Seating Arrangement</h1>
+                <div class="user-info">
+                    <span id="currentDateTime"></span>
+                    <span>Student</span>
+                    <i class="fas fa-user-circle"></i>
+                    <button id="logoutBtn" class="btn btn-secondary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="control-group">
+                        <select id="examFilter">
+                            <option value="">Select Exam</option>
+                            <!-- Exam options will be populated by JavaScript -->
+                        </select>
+                        <button id="viewSeatingBtn" class="btn btn-primary" disabled>
+                            <i class="fas fa-eye"></i> View Seating Plan
+                        </button>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-item">
+                            <strong>Roll Number:</strong> <span id="studentRollNumber">B1-123</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Section:</strong> <span id="studentSection">B1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seating Plan -->
+                <div class="seating-plan-container">
+                    <div class="seating-plan-header">
+                        <h2 id="seatingPlanTitle">Select an exam to view seating arrangement</h2>
+                        <div class="exam-details" id="examDetails">
+                            <!-- Exam details will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="seating-plan-content">
+                        <div class="room-layout" id="roomLayout">
+                            <!-- Room layout will be populated by JavaScript -->
+                        </div>
+                        
+                        <div class="seating-info">
+                            <div class="info-card">
+                                <h3><i class="fas fa-info-circle"></i> Your Seat</h3>
+                                <div class="seat-details">
+                                    <div class="seat-info">
+                                        <strong>Seat Number:</strong> <span id="seatNumber">-</span>
+                                    </div>
+                                    <div class="seat-info">
+                                        <strong>Row:</strong> <span id="seatRow">-</span>
+                                    </div>
+                                    <div class="seat-info">
+                                        <strong>Column:</strong> <span id="seatColumn">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h3><i class="fas fa-ruler-combined"></i> Room Information</h3>
+                                <div class="room-details">
+                                    <div class="room-info">
+                                        <strong>Room Number:</strong> <span id="roomNumber">-</span>
+                                    </div>
+                                    <div class="room-info">
+                                        <strong>Total Seats:</strong> <span id="totalSeats">-</span>
+                                    </div>
+                                    <div class="room-info">
+                                        <strong>Rows:</strong> <span id="totalRows">-</span>
+                                    </div>
+                                    <div class="room-info">
+                                        <strong>Columns:</strong> <span id="totalColumns">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h3><i class="fas fa-exclamation-triangle"></i> Important Instructions</h3>
+                                <ul class="instructions-list">
+                                    <li>Arrive at least 30 minutes before the exam starts</li>
+                                    <li>Bring your ID card and admit card</li>
+                                    <li>Follow the seating arrangement strictly</li>
+                                    <li>No swapping of seats is allowed</li>
+                                    <li>Maintain silence in the examination hall</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalExamsWithSeating">0</h3>
+                            <p>Exams with Seating</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chair"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="assignedSeats">0</h3>
+                            <p>Assigned Seats</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="nextSeatingDate">-</h3>
+                            <p>Next Seating Date</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../utils.js"></script>
+    <script src="seating.js"></script>
+</body>
+</html>

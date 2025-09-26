@@ -1,0 +1,6 @@
+name,email,phone,department,availability
+Prof. John Smith,john.smith@college.edu,123-456-7890,Mathematics,Yes
+Prof. Jane Doe,jane.doe@college.edu,098-765-4321,Physics,No
+Dr. Robert Johnson,robert.johnson@college.edu,555-123-4567,Chemistry,Yes
+Dr. Emily Williams,emily.williams@college.edu,555-987-6543,Biology,Yes
+Prof. Michael Brown,michael.brown@college.edu,555-456-7890,English,No

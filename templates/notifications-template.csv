@@ -1,0 +1,4 @@
+title,message,type,priority,recipientType,status,sendEmail,isActive
+"Exam Schedule Update","The exam schedule has been updated. Please check the timetable section for details.","info","medium","all","unread",false,true
+"Room Change Notice","Room 101 is under maintenance. Exams will be held in Room 102 instead.","warning","high","all","unread",true,true
+"Result Announcement","Results for the mid-term exams are now available.","success","medium","all","unread",false,true
