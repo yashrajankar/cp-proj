@@ -309,7 +309,7 @@ function updatePaginationInfo(totalItems) {
     const paginationInfo = document.getElementById('paginationInfo');
     if (!paginationInfo) return;
     
-    const startIndex = (currentPage - 1) * pageSize + 1;
+    const startIndex = (currentPage - 1) * pageSize;
     const endIndex = Math.min(currentPage * pageSize, totalItems);
     
     paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems} rooms`;
@@ -825,12 +825,25 @@ function renderRollAssignmentsTableFromPython(assignments) {
     let html = '';
 
     assignmentsData.forEach(assignment => {
-        // Format roll numbers as tags (they're already sorted)
-        const rollNumbersHtml = assignment.students && assignment.students.length > 0 
-            ? assignment.students
-                .map(student => `<span class="roll-number-tag">${student.rollNo || 'N/A'}</span>`)
-                .join('')
-            : '<span class="no-assignments">No roll numbers assigned</span>';
+        // Create a 5x8 grid (40 cells) for roll numbers - arranged vertically
+        let rollNumbersHtml = '';
+        
+        // Get the assigned students
+        const students = assignment.students || [];
+        
+        // Fill the grid with up to 40 cells in vertical order (column by column)
+        for (let i = 0; i < 40; i++) {
+            const col = Math.floor(i / 8) + 1;  // Column index (1-5)
+            const row = (i % 8) + 1;            // Row index (1-8)
+            
+            if (i < students.length && students[i] && students[i].rollNo) {
+                // Add actual roll number with grid position
+                rollNumbersHtml += `<span class="roll-number-tag" style="grid-column: ${col}; grid-row: ${row};">${students[i].rollNo}</span>`;
+            } else {
+                // Add placeholder for empty cell with grid position
+                rollNumbersHtml += `<span class="roll-number-placeholder" style="grid-column: ${col}; grid-row: ${row};"></span>`;
+            }
+        }
 
         html += `
             <tr>
@@ -838,7 +851,7 @@ function renderRollAssignmentsTableFromPython(assignments) {
                 <td>${assignment.building || 'N/A'}</td>
                 <td>${assignment.capacity || 0}</td>
                 <td class="roll-numbers-cell">${rollNumbersHtml}</td>
-                <td>${assignment.students ? assignment.students.length : 0}</td>
+                <td>${students.length}</td>
             </tr>
         `;
     });
