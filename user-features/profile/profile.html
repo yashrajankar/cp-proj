@@ -14,12 +14,12 @@
         <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-graduation-cap"></i> Portal</h2>
+                <h2><i class="fas fa-graduation-cap"></i> Student Portal</h2>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="../dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="../exams/exams.html"><i class="fas fa-calendar-alt"></i> Exam Timetable</a></li>
-                <li><a href="../seating/seating.html"><i class="fas fa-chair"></i> Seating Arrangement</a></li>
+                <li><a href="../room-assignments/room-assignments.html"><i class="fas fa-door-open"></i> Room Assignments</a></li>
                 <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li><a href="profile.html" class="active"><i class="fas fa-user-circle"></i> Profile</a></li>
                 <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -48,9 +48,9 @@
                             <i class="fas fa-user-circle"></i>
                         </div>
                         <div class="profile-info">
-                            <h2 id="studentName">John Doe</h2>
-                            <p id="studentRollNumber">Roll Number: B1-123</p>
-                            <p id="studentSection">Section: B1</p>
+                            <h2 id="studentName">Loading...</h2>
+                            <p id="studentRollNumber">Roll Number: Loading...</p>
+                            <p id="studentSection">Section: Loading...</p>
                         </div>
                         <div class="profile-actions">
                             <button id="editProfileBtn" class="btn btn-primary">
@@ -64,15 +64,15 @@
                         <div class="profile-grid">
                             <div class="profile-picture-section">
                                 <div class="profile-picture-container">
-                                    <div class="profile-picture-placeholder">
+                                    <div class="profile-picture-placeholder" id="profilePictureContainer">
                                         <i class="fas fa-user"></i>
                                     </div>
                                 </div>
                                 <div class="profile-picture-controls">
-                                    <button class="btn-upload-picture">
+                                    <button class="btn-upload-picture" id="uploadPictureBtn">
                                         <i class="fas fa-upload"></i> Upload Picture
                                     </button>
-                                    <button class="btn-remove-picture">
+                                    <button class="btn-remove-picture" id="removePictureBtn">
                                         <i class="fas fa-trash"></i> Remove Picture
                                     </button>
                                 </div>
@@ -84,19 +84,19 @@
                                     <div class="details-grid">
                                         <div class="detail-item">
                                             <label>Full Name</label>
-                                            <span id="fullName">John Doe</span>
+                                            <span id="fullName" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Date of Birth</label>
-                                            <span id="dateOfBirth">15 Jan 2005</span>
+                                            <span id="dateOfBirth" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Gender</label>
-                                            <span id="gender">Male</span>
+                                            <span id="gender" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Blood Group</label>
-                                            <span id="bloodGroup">O+</span>
+                                            <span id="bloodGroup" class="detail-value">Loading...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -106,15 +106,15 @@
                                     <div class="details-grid">
                                         <div class="detail-item">
                                             <label>Email Address</label>
-                                            <span id="email">john.doe@example.com</span>
+                                            <span id="email" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Phone Number</label>
-                                            <span id="phone">+1234567890</span>
+                                            <span id="phone" class="detail-value">Loading...</span>
                                         </div>
-                                        <div class="detail-item">
+                                        <div class="detail-item full-width">
                                             <label>Address</label>
-                                            <span id="address">123 Main Street, City, State, 12345</span>
+                                            <span id="address" class="detail-value">Loading...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -124,19 +124,19 @@
                                     <div class="details-grid">
                                         <div class="detail-item">
                                             <label>Roll Number</label>
-                                            <span id="rollNumber">B1-123</span>
+                                            <span id="rollNumber" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Section</label>
-                                            <span id="section">B1</span>
+                                            <span id="section" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Course</label>
-                                            <span id="course">Bachelor of Science</span>
+                                            <span id="course" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Enrollment Date</label>
-                                            <span id="enrollmentDate">15 Aug 2023</span>
+                                            <span id="enrollmentDate" class="detail-value">Loading...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -146,15 +146,15 @@
                                     <div class="details-grid">
                                         <div class="detail-item">
                                             <label>Contact Name</label>
-                                            <span id="emergencyContactName">Jane Doe</span>
+                                            <span id="emergencyContactName" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Relationship</label>
-                                            <span id="emergencyRelationship">Mother</span>
+                                            <span id="emergencyRelationship" class="detail-value">Loading...</span>
                                         </div>
                                         <div class="detail-item">
                                             <label>Phone Number</label>
-                                            <span id="emergencyPhone">+1234567891</span>
+                                            <span id="emergencyPhone" class="detail-value">Loading...</span>
                                         </div>
                                     </div>
                                 </div>

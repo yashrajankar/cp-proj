@@ -1394,7 +1394,7 @@ async function loadRollAssignments() {
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 2rem;">
                         <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-600); margin-bottom: 1rem;"></i>
-                        <p>Loading room assignments...</p>
+                        <p>Loading...</p>
                     </td>
                 </tr>
             `;

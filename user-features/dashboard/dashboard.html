@@ -6,21 +6,21 @@
     <title>Student Dashboard - AICN</title>
     <link rel="stylesheet" href="../../admin.css">
     <link rel="stylesheet" href="dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="toastContainer" aria-live="polite"></div>
+    
     <div class="admin-container">
         <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <h2>Student Portal</h2>
+                <h2><i class="fas fa-graduation-cap"></i> Student Portal</h2>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="../exams/exams.html"><i class="fas fa-calendar-alt"></i> Exam Timetable</a></li>
-                <li><a href="../seating/seating.html"><i class="fas fa-chair"></i> Seating Arrangement</a></li>
-                <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="../room-assignments/room-assignments.html"><i class="fas fa-door-open"></i> Room Assignments</a></li>
                 <li><a href="../profile/profile.html"><i class="fas fa-user-circle"></i> Profile</a></li>
                 <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -41,133 +41,107 @@
             </div>
 
             <div class="content-wrapper">
+                <!-- Welcome Section -->
                 <div class="welcome-section">
-                    <h2>Welcome, Student!</h2>
-                    <p>Here's your personalized dashboard with all the information you need for your exams.</p>
+                    <h2>Examination Management System</h2>
+                    <p>Your personalized dashboard for managing exam information</p>
                 </div>
 
+                <!-- Summary Stats -->
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Your Overview</h2>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon students-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalExams">0</h3>
+                            <p>Scheduled Exams</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon timetable-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="upcomingExams">0</h3>
+                            <p>Upcoming Exams</p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <!-- Data Summary Sections -->
                 <div class="dashboard-grid">
                     <!-- Upcoming Exams -->
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-calendar-check"></i>
-                            <h3>Upcoming Exams</h3>
-                        </div>
-                        <div class="exam-list">
-                            <div class="exam-item">
-                                <div class="exam-details">
-                                    <div class="exam-subject">Mathematics</div>
-                                    <div class="exam-meta">
-                                        <span><i class="fas fa-calendar"></i> 15 Oct 2025</span>
-                                        <span><i class="fas fa-clock"></i> 10:00 AM</span>
-                                    </div>
-                                </div>
-                                <div class="exam-status status-scheduled">Scheduled</div>
-                            </div>
-                            <div class="exam-item">
-                                <div class="exam-details">
-                                    <div class="exam-subject">Physics</div>
-                                    <div class="exam-meta">
-                                        <span><i class="fas fa-calendar"></i> 18 Oct 2025</span>
-                                        <span><i class="fas fa-clock"></i> 2:00 PM</span>
-                                    </div>
-                                </div>
-                                <div class="exam-status status-scheduled">Scheduled</div>
-                            </div>
-                            <div class="exam-item">
-                                <div class="exam-details">
-                                    <div class="exam-subject">Chemistry</div>
-                                    <div class="exam-meta">
-                                        <span><i class="fas fa-calendar"></i> 22 Oct 2025</span>
-                                        <span><i class="fas fa-clock"></i> 9:00 AM</span>
-                                    </div>
-                                </div>
-                                <div class="exam-status status-scheduled">Scheduled</div>
+                    <div class="dashboard-widget full-width">
+                        <h3><i class="fas fa-calendar-check"></i> Upcoming Exams</h3>
+                        <div class="data-summary" id="upcomingExamsList">
+                            <div class="summary-placeholder">
+                                <i class="fas fa-spinner fa-spin"></i> Loading exam schedule...
                             </div>
                         </div>
-                        <a href="../exams/exams.html" class="view-all-link">View Full Timetable</a>
                     </div>
+                    
 
-                    <!-- Seating Arrangement -->
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chair"></i>
-                            <h3>Seating Arrangement</h3>
-                        </div>
-                        <div class="seating-info" id="seatingInfo">
-                            <div class="seating-item">
-                                <span class="seating-label">Loading seating arrangements...</span>
-                                <span class="seating-value"><i class="fas fa-spinner fa-spin"></i></span>
-                            </div>
-                        </div>
-                        <a href="../seating/seating.html" class="view-all-link">View All Assignments</a>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="section-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Access</h2>
+                </div>
+                
+                <div class="quick-actions-grid">
+                    <div class="dashboard-widget" onclick="window.location.href='../exams/exams.html'">
+                        <h3><i class="fas fa-calendar-alt"></i> Exam Timetable</h3>
+                        <p>View your complete exam schedule and important dates.</p>
+                        <button class="btn btn-primary widget-btn" onclick="window.location.href='../exams/exams.html'; event.stopPropagation();">View Timetable</button>
                     </div>
-
-                    <!-- Recent Notifications -->
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-bell"></i>
-                            <h3>Recent Notifications</h3>
-                        </div>
-                        <div class="notification-list">
-                            <div class="notification-item">
-                                <div class="notification-title">Exam Schedule Updated</div>
-                                <div class="notification-content">The Mathematics exam has been rescheduled to 15 Oct 2025.</div>
-                                <div class="notification-time">2 hours ago</div>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-title">Seating Arrangement Published</div>
-                                <div class="notification-content">Your seating arrangements for all exams are now available.</div>
-                                <div class="notification-time">1 day ago</div>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-title">Important Guidelines</div>
-                                <div class="notification-content">Please read the updated exam guidelines before your exams.</div>
-                                <div class="notification-time">2 days ago</div>
-                            </div>
-                        </div>
-                        <a href="../notifications/notifications.html" class="view-all-link">View All Notifications</a>
+                    
+                    <div class="dashboard-widget" onclick="window.location.href='../profile/profile.html'">
+                        <h3><i class="fas fa-user-circle"></i> Profile</h3>
+                        <p>Manage your personal information and settings.</p>
+                        <button class="btn btn-primary widget-btn" onclick="window.location.href='../profile/profile.html'; event.stopPropagation();">View Profile</button>
                     </div>
                 </div>
-
-                <!-- Profile Summary -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-user"></i>
-                        <h3>Profile Summary</h3>
-                    </div>
-                    <div class="dashboard-grid">
-                        <div class="card" style="box-shadow: none; border: 1px solid var(--gray-200);">
-                            <div class="seating-item">
-                                <span class="seating-label">Name:</span>
-                                <span class="seating-value">John Doe</span>
-                            </div>
-                            <div class="seating-item">
-                                <span class="seating-label">Roll Number:</span>
-                                <span class="seating-value">B1-123</span>
-                            </div>
-                            <div class="seating-item">
-                                <span class="seating-label">Section:</span>
-                                <span class="seating-value">B1</span>
-                            </div>
+                
+                <!-- System Information -->
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> System Information</h2>
+                </div>
+                
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-database"></i>
                         </div>
-                        <div class="card" style="box-shadow: none; border: 1px solid var(--gray-200);">
-                            <div class="seating-item">
-                                <span class="seating-label">Email:</span>
-                                <span class="seating-value">john.doe@example.com</span>
-                            </div>
-                            <div class="seating-item">
-                                <span class="seating-label">Phone:</span>
-                                <span class="seating-value">+1234567890</span>
-                            </div>
-                            <div class="seating-item">
-                                <span class="seating-label">Enrollment Date:</span>
-                                <span class="seating-value">15 Aug 2023</span>
-                            </div>
+                        <div class="info-card-content">
+                            <h3>System Status</h3>
+                            <p id="systemStatus">Operational</p>
                         </div>
                     </div>
-                    <div style="text-align: center; margin-top: var(--space-4);">
-                        <a href="../profile/profile.html" class="btn btn-primary"><i class="fas fa-edit"></i> Update Profile</a>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <h3>Last Updated</h3>
+                            <p id="lastUpdated">Just now</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <h3>Support</h3>
+                            <p>Contact admin for assistance</p>
+                        </div>
                     </div>
                 </div>
             </div>

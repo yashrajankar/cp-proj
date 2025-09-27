@@ -6,7 +6,7 @@
     <title>Exam Timetable - Student Portal</title>
     <link rel="stylesheet" href="../../admin.css">
     <link rel="stylesheet" href="exams.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="toastContainer" aria-live="polite"></div>
@@ -14,12 +14,12 @@
         <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <h2>Student Portal</h2>
+                <h2><i class="fas fa-graduation-cap"></i> Student Portal</h2>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="../dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="exams.html" class="active"><i class="fas fa-calendar-alt"></i> Exam Timetable</a></li>
-                <li><a href="../seating/seating.html"><i class="fas fa-chair"></i> Seating Arrangement</a></li>
+                <li><a href="../room-assignments/room-assignments.html"><i class="fas fa-door-open"></i> Room Assignments</a></li>
                 <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li><a href="../profile/profile.html"><i class="fas fa-user-circle"></i> Profile</a></li>
                 <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -44,79 +44,61 @@
                 <!-- Controls Section -->
                 <div class="controls-section">
                     <div class="control-group">
-                        <select id="subjectFilter">
-                            <option value="">All Subjects</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                            <option value="Biology">Biology</option>
-                            <option value="English">English</option>
+                        <div class="dropdown">
+                            <button id="exportTimetableBtn" class="btn btn-secondary dropdown-toggle">
+                                <i class="fas fa-file-export"></i> Export
+                            </button>
+                            <div class="dropdown-menu" id="exportTimetableDropdown">
+                                <button class="dropdown-item" id="exportTimetablePdfBtn">
+                                    <i class="fas fa-file-pdf"></i> Export as PDF
+                                </button>
+                                <button class="dropdown-item" id="exportTimetableCsvBtn">
+                                    <i class="fas fa-file-csv"></i> Export as CSV
+                                </button>
+                                <button class="dropdown-item" id="exportTimetableExcelBtn">
+                                    <i class="fas fa-file-excel"></i> Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                         <select id="dateFilter">
                             <option value="">All Dates</option>
-                            <option value="upcoming">Upcoming Exams</option>
-                            <option value="past">Past Exams</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="past">Past</option>
                         </select>
                     </div>
                     <div class="search-group">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="examSearch" placeholder="Search exams by subject or date...">
+                            <input type="text" id="timetableSearch" placeholder="Search exams by code or subject...">
                         </div>
                     </div>
                 </div>
 
-                <!-- Exam Schedule -->
+                <!-- Exam Table -->
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Date & Time</th>
-                                <th>Subject</th>
                                 <th>Exam Code</th>
-                                <th>Duration</th>
-                                <th>Room</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Time</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="examsTableBody">
-                            <!-- Exam data will be populated by JavaScript -->
+                        <tbody id="timetableTableBody">
+                            <!-- Exam rows will be populated by JavaScript -->
                         </tbody>
                     </table>
                     
-                    <!-- Pagination Controls -->
-                    <div class="pagination-container">
-                        <div class="pagination-info">
-                            <span id="paginationInfo">Showing 0-0 of 0 exams</span>
-                        </div>
-                        <div class="pagination-controls">
-                            <button id="firstPageBtn" class="btn btn-secondary" disabled>
-                                <i class="fas fa-angle-double-left"></i> First
-                            </button>
-                            <button id="prevPageBtn" class="btn btn-secondary" disabled>
-                                <i class="fas fa-angle-left"></i> Previous
-                            </button>
-                            <span class="page-numbers">
-                                <input type="number" id="pageInput" min="1" value="1" class="page-input">
-                                <span>of <span id="totalPages">1</span></span>
-                            </span>
-                            <button id="nextPageBtn" class="btn btn-secondary">
-                                Next <i class="fas fa-angle-right"></i>
-                            </button>
-                            <button id="lastPageBtn" class="btn btn-secondary">
-                                Last <i class="fas fa-angle-double-right"></i>
-                            </button>
-                        </div>
-                        <div class="page-size-selector">
-                            <label for="pageSizeSelect">Items per page:</label>
-                            <select id="pageSizeSelect">
-                                <option value="10">10</option>
-                                <option value="25" selected>25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Statistics Section -->
@@ -126,8 +108,17 @@
                             <i class="fas fa-calendar-check"></i>
                         </div>
                         <div class="stat-content">
-                            <h3 id="totalExams">0</h3>
+                            <h3 id="totalEntries">0</h3>
                             <p>Total Exams</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalSubjects">0</h3>
+                            <p>Subjects</p>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -137,15 +128,6 @@
                         <div class="stat-content">
                             <h3 id="upcomingExams">0</h3>
                             <p>Upcoming Exams</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-day"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="nextExamDate">-</h3>
-                            <p>Next Exam Date</p>
                         </div>
                     </div>
                 </div>

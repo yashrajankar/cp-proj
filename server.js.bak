@@ -3397,6 +3397,31 @@ app.delete('/api/assignedClassrooms/assignment/:assignmentId', async (req, res) 
 });
 
 // Get user's notifications
+app.get('/api/user/notifications', async (req, res) => {
+    try {
+        const { limit } = req.query;
+        
+        // Fetch real notifications from the database
+        const notifications = await databaseService.getNotifications();
+        
+        // Transform the data to match the expected format for the frontend
+        let formattedNotifications = notifications.map(notification => ({
+            id: notification._id,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type,
+            timestamp: notification.createdAt
+        }));
+        
+        // Apply limit if provided
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Get user's notifications
 // Removed user notifications endpoint as the feature is no longer needed
 
 // Serve static files from the current directory
