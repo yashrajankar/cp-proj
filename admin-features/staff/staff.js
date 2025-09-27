@@ -1250,6 +1250,18 @@ async function generateAssignments() {
         
         console.log('Generate assignments result:', result);
         
+        // Add debugging for the assignments data
+        if (result && result.assignments) {
+            console.log('Assignments data structure:', typeof result.assignments);
+            console.log('Assignments keys:', Object.keys(result.assignments));
+            
+            // Log first day's assignments if available
+            const keys = Object.keys(result.assignments);
+            if (keys.length > 0) {
+                console.log(`First day (${keys[0]}) assignments:`, result.assignments[keys[0]]);
+            }
+        }
+        
         showSuccess(result.message);
         displayAssignments(result.assignments, 'generated');
         
@@ -1377,6 +1389,26 @@ async function viewAssignments() {
         const allocations = await fetchData('staffAllocations/history');
         
         console.log('Retrieved allocations:', allocations);
+        
+        // Add debugging for the allocations data
+        if (allocations && Array.isArray(allocations) && allocations.length > 0) {
+            console.log('First allocation data structure:', typeof allocations[0]);
+            console.log('First allocation keys:', Object.keys(allocations[0]));
+            
+            if (allocations[0].allocationData) {
+                console.log('First allocation allocationData type:', typeof allocations[0].allocationData);
+                if (typeof allocations[0].allocationData === 'string') {
+                    try {
+                        const parsedData = JSON.parse(allocations[0].allocationData);
+                        console.log('Parsed allocationData:', parsedData);
+                    } catch (parseError) {
+                        console.error('Failed to parse allocationData:', parseError);
+                    }
+                } else {
+                    console.log('AllocationData object keys:', Object.keys(allocations[0].allocationData));
+                }
+            }
+        }
         
         if (allocations && allocations.length > 0) {
             displayAssignments(allocations);
@@ -1908,6 +1940,8 @@ function displayAssignments(allocations, type = 'viewed') {
         }];
     }
     
+    console.log('Processing allocations array:', allocationsArray);
+    
     // Create HTML for assignments
     let html = '';
     
@@ -1925,6 +1959,8 @@ function displayAssignments(allocations, type = 'viewed') {
         if (typeof allocationData === 'object' && !Array.isArray(allocationData)) {
             // Check if this is a nested structure (days -> rooms -> staff)
             const keys = Object.keys(allocationData);
+            
+            console.log('Allocation data keys:', keys);
             
             // If the first key looks like a day (e.g., "Day 1", "Monday", etc.)
             if (keys.length > 0 && (keys[0].includes('Day') || keys[0].includes('Monday') || keys[0].includes('Tuesday') || 
@@ -1975,6 +2011,8 @@ function displayAssignments(allocations, type = 'viewed') {
         html += '</div></div>';
     });
     
+    console.log('Generated HTML:', html);
+    
     // Set the HTML content
     container.innerHTML = html;
     
@@ -1988,4 +2026,6 @@ function displayAssignments(allocations, type = 'viewed') {
     resultsSection.scrollIntoView({ behavior: 'smooth' });
     
     showToast('Assignments displayed successfully', 'success');
+    console.log('Assignment display completed');
 }
+

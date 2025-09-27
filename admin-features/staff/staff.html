@@ -48,37 +48,6 @@
             </div>
 
             <div class="content-wrapper">
-                <!-- Stats Section -->
-                <div class="stats-section">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="totalStaff">0</h3>
-                            <p>Total Staff</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="availableStaff">0</h3>
-                            <p>Available Staff</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="unavailableStaff">0</h3>
-                            <p>Unavailable Staff</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Controls Section -->
                 <div class="controls-section">
                     <div class="control-group">
@@ -134,37 +103,105 @@
                         </tbody>
                     </table>
                     
+                    <!-- Pagination Controls -->
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            <span id="paginationInfo">Showing 0-0 of 0 staff</span>
+                        </div>
+                        <div class="pagination-controls">
+                            <button id="firstPageBtn" class="btn btn-secondary" disabled>
+                                <i class="fas fa-angle-double-left"></i> First
+                            </button>
+                            <button id="prevPageBtn" class="btn btn-secondary" disabled>
+                                <i class="fas fa-angle-left"></i> Previous
+                            </button>
+                            <span class="page-numbers">
+                                <input type="number" id="pageInput" min="1" value="1" class="page-input">
+                                <span>of <span id="totalPages">1</span></span>
+                            </span>
+                            <button id="nextPageBtn" class="btn btn-secondary">
+                                Next <i class="fas fa-angle-right"></i>
+                            </button>
+                            <button id="lastPageBtn" class="btn btn-secondary">
+                                Last <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </div>
+                        <div class="page-size-selector">
+                            <label for="pageSizeSelect">Items per page:</label>
+                            <select id="pageSizeSelect">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Invigilator Assignment Section -->
                 <div class="section">
                     <div class="section-header">
                         <h2><i class="fas fa-user-check"></i> Invigilator Assignment</h2>
-                    </div>
-                    
-                    <div class="assignment-controls">
-                        <div class="control-group">
-                            <button id="assignInvigilatorsBtn" class="btn btn-primary">
+                        <div style="display: flex; gap: var(--space-2); margin-top: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" id="assignInvigilatorsBtn">
                                 <i class="fas fa-random"></i> Generate Random Assignments
                             </button>
-                            <button id="saveAssignmentsBtn" class="btn btn-success">
+                            <button class="btn btn-secondary" id="saveAssignmentsBtn">
                                 <i class="fas fa-save"></i> Save Assignments
                             </button>
-                            <button id="clearAssignmentsBtn" class="btn btn-warning">
+                            <button class="btn btn-secondary" id="clearAssignmentsBtn">
                                 <i class="fas fa-trash-alt"></i> Clear Assignments
                             </button>
-                            <button id="viewAssignmentsBtn" class="btn btn-info">
+                            <button class="btn btn-secondary" id="viewAssignmentsBtn">
                                 <i class="fas fa-eye"></i> View Assignments
                             </button>
-                            <button id="exportAssignmentsBtn" class="btn btn-secondary">
+                            <button class="btn btn-secondary" id="exportAssignmentsBtn">
                                 <i class="fas fa-file-export"></i> Export Assignments
                             </button>
+                            <div class="connection-status connected" id="assignmentsConnectionStatus">
+                                <i class="fas fa-circle"></i>
+                                <span>Live</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" id="refreshAssignmentsBtn">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
                         </div>
-                        
                     </div>
-                    
-                    <div class="assignment-results" id="assignmentResults" style="display: none;">
-                        <div id="assignmentsContainer" class="assignments-container"></div>
+                </div>
+                
+                <!-- Assignment Results Section -->
+                <div class="assignment-results" id="assignmentResults" style="display: none;">
+                    <div id="assignmentsContainer" class="assignments-container"></div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalStaff">0</h3>
+                            <p>Total Staff</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="availableStaff">0</h3>
+                            <p>Available Staff</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="unavailableStaff">0</h3>
+                            <p>Unavailable Staff</p>
+                        </div>
                     </div>
                 </div>
             </div>

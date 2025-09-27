@@ -1329,6 +1329,19 @@ app.delete('/api/notifications', async (req, res) => {
   }
 });
 
+// Mark all notifications as read
+app.put('/api/notifications/mark-all-read', async (req, res) => {
+  try {
+    // Update all unread notifications to read status
+    const query = 'UPDATE notifications SET status = ? WHERE status = ?';
+    await databaseService.executeQuery(query, ['read', 'unread']);
+    res.json({ message: 'All notifications marked as read' });
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    res.status(500).json({ error: 'Failed to mark all notifications as read' });
+  }
+});
+
 // Bulk import notifications
 app.post('/api/notifications/bulk', async (req, res) => {
     try {

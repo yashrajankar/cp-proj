@@ -6,46 +6,7 @@
 /* Remove duplicate CSS variables and use global.css variables instead */
 @import url('../../global.css');
 
-.admin-container {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* Main Content Styles */
-.main-content {
-    flex: 1;
-    padding: 20px;
-    margin-left: 250px;
-    overflow-y: auto;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--gray-300);
-}
-
-.header h1 {
-    font-size: 1.8rem;
-    color: var(--gray-900);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.content-wrapper {
-    padding: 20px 0;
-}
+/* Main Content Styles - using global admin styles */
 
 /* Profile Styles */
 .profile-container {
@@ -306,62 +267,7 @@
     border-top: 1px solid var(--gray-300);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 220px;
-    }
-    
-    .main-content {
-        margin-left: 220px;
-    }
-}
-
-@media (max-width: 768px) {
-    .admin-container {
-        flex-direction: column;
-    }
-    
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
-    }
-    
-    .sidebar-menu {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .sidebar-menu li {
-        margin: 5px;
-    }
-    
-    .sidebar-menu a {
-        padding: 10px 15px;
-        border-radius: var(--radius-lg);
-        font-size: 0.9rem;
-    }
-    
-    .content-wrapper {
-        padding: 15px 0;
-    }
-    
-    .profile-content {
-        padding: var(--space-3);
-    }
-    
-    .profile-grid {
-        grid-template-columns: 1fr;
-    }
-}
+/* Responsive Design - using global admin styles */
 
 @media (max-width: 480px) {
     .header {

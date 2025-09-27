@@ -926,20 +926,9 @@ class DatabaseService {
   // Staff Allocations operations
   async getStaffAllocations() {
     try {
-      const query = 'SELECT id as _id, allocationData, date, createdAt, updatedAt FROM staff_allocations ORDER BY date DESC';
-      const results = await this.executeQuery(query);
-      
-      // Parse the allocationData JSON strings
-      return results.map(allocation => {
-        if (typeof allocation.allocationData === 'string') {
-          try {
-            allocation.allocationData = JSON.parse(allocation.allocationData);
-          } catch (parseError) {
-            console.error('Error parsing allocationData JSON:', parseError);
-          }
-        }
-        return allocation;
-      });
+      const query = 'SELECT id as _id, date, allocationData FROM staff_allocations ORDER BY date DESC';
+      const rows = await this.executeQuery(query);
+      return rows;
     } catch (error) {
       console.error('Error in getStaffAllocations:', error);
       throw error;
@@ -948,23 +937,9 @@ class DatabaseService {
 
   async getStaffAllocationById(id) {
     try {
-      const query = 'SELECT id as _id, allocationData, date, createdAt, updatedAt FROM staff_allocations WHERE id = ?';
+      const query = 'SELECT id as _id, date, allocationData FROM staff_allocations WHERE id = ?';
       const rows = await this.executeQuery(query, [id]);
-      
-      if (rows.length > 0) {
-        const allocation = rows[0];
-        // Parse the allocationData JSON string
-        if (typeof allocation.allocationData === 'string') {
-          try {
-            allocation.allocationData = JSON.parse(allocation.allocationData);
-          } catch (parseError) {
-            console.error('Error parsing allocationData JSON:', parseError);
-          }
-        }
-        return allocation;
-      }
-      
-      return null;
+      return rows[0];
     } catch (error) {
       console.error('Error in getStaffAllocationById:', error);
       throw error;
@@ -973,23 +948,9 @@ class DatabaseService {
 
   async getStaffAllocationByDate(date) {
     try {
-      const query = 'SELECT id as _id, allocationData, date, createdAt, updatedAt FROM staff_allocations WHERE date = ?';
+      const query = 'SELECT id as _id, date, allocationData FROM staff_allocations WHERE date = ?';
       const rows = await this.executeQuery(query, [date]);
-      
-      if (rows.length > 0) {
-        const allocation = rows[0];
-        // Parse the allocationData JSON string
-        if (typeof allocation.allocationData === 'string') {
-          try {
-            allocation.allocationData = JSON.parse(allocation.allocationData);
-          } catch (parseError) {
-            console.error('Error parsing allocationData JSON:', parseError);
-          }
-        }
-        return allocation;
-      }
-      
-      return null;
+      return rows[0];
     } catch (error) {
       console.error('Error in getStaffAllocationByDate:', error);
       throw error;
@@ -998,25 +959,21 @@ class DatabaseService {
 
   async createStaffAllocation(allocation) {
     try {
-      const { allocationData, date } = allocation;
-      const query = 'INSERT INTO staff_allocations (allocationData, date) VALUES (?, ?)';
-      const result = await this.executeQuery(query, [JSON.stringify(allocationData), date]);
+      const { date, allocationData } = allocation;
+      const query = 'INSERT INTO staff_allocations (date, allocationData) VALUES (?, ?)';
+      const result = await this.executeQuery(query, [date, JSON.stringify(allocationData)]);
       return result;
     } catch (error) {
       console.error('Error in createStaffAllocation:', error);
-      // Handle duplicate entry error
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new Error('Staff allocation for this date already exists');
-      }
       throw error;
     }
   }
 
   async updateStaffAllocation(id, allocation) {
     try {
-      const { allocationData, date } = allocation;
-      const query = 'UPDATE staff_allocations SET allocationData = ?, date = ? WHERE id = ?';
-      const result = await this.executeQuery(query, [JSON.stringify(allocationData), date, id]);
+      const { date, allocationData } = allocation;
+      const query = 'UPDATE staff_allocations SET date = ?, allocationData = ? WHERE id = ?';
+      const result = await this.executeQuery(query, [date, JSON.stringify(allocationData), id]);
       return result;
     } catch (error) {
       console.error('Error in updateStaffAllocation:', error);
