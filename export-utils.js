@@ -1,7 +1,5 @@
-// export-utils.js - Standardized export utilities for consistent export functionality across all sections
-
 /**
- * Generate a professional PDF document with standardized styling
+ * Generate a professional PDF document using jsPDF library
  * @param {Object} options - Configuration options for the PDF
  * @param {string} options.title - Document title
  * @param {Array} options.headers - Table headers
@@ -19,241 +17,128 @@ function exportToPDF(options) {
     } = options;
     
     try {
-        // Check if pdfMake is available
-        if (typeof pdfMake === 'undefined') {
-            console.error('pdfMake library is not loaded');
+        // Check if jsPDF is available
+        if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+            console.error('jsPDF library is not loaded');
             hideLoadingOverlay();
             showToast('Failed to export as PDF: PDF library not loaded', 'error');
             return false;
         }
         
-        // Determine page orientation based on number of columns
-        const pageOrientation = headers.length > 5 ? 'landscape' : 'portrait';
+        // Initialize jsPDF (handle both global and module versions)
+        let jsPDFLib;
+        if (typeof window.jspdf !== 'undefined') {
+            // Modern version (as UMD module)
+            jsPDFLib = window.jspdf.jsPDF;
+        } else {
+            // Legacy version (as global)
+            jsPDFLib = window.jsPDF;
+        }
         
-        // Prepare data for PDF with enhanced styling
-        const docDefinition = {
-            pageSize: 'A4',
-            pageOrientation: pageOrientation,
-            pageMargins: [40, 80, 40, 60],
-            content: [
-                {
-                    text: title.toUpperCase(),
-                    style: 'header',
-                    alignment: 'center'
-                },
-                {
-                    text: `Generated on: ${new Date().toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    })}`,
-                    style: 'subheader',
-                    alignment: 'center',
-                    margin: [0, 0, 0, 20]
-                }
-            ],
-            styles: {
-                header: {
-                    fontSize: 22,
-                    bold: true,
-                    margin: [0, 0, 0, 10],
-                    color: '#2c3e50'
-                },
-                subheader: {
-                    fontSize: 12,
-                    bold: true,
-                    margin: [0, 5, 0, 15],
-                    color: '#7f8c8d'
-                },
-                metadata: {
-                    fontSize: 10,
-                    italics: true,
-                    color: '#95a5a6'
-                },
-                tableHeader: {
-                    bold: true,
-                    fontSize: 10,
-                    color: '#ffffff',
-                    fillColor: '#3498db',
-                    alignment: 'center'
-                },
-                tableCell: {
-                    fontSize: 9,
-                    color: '#2c3e50'
-                },
-                tableAltRow: {
-                    fillColor: '#f8f9fa'
-                }
-            },
-            defaultStyle: {
-                fontSize: 9,
-                color: '#34495e'
-            }
-        };
+        if (typeof jsPDFLib === 'undefined') {
+            console.error('jsPDF library is not properly loaded');
+            hideLoadingOverlay();
+            showToast('Failed to export as PDF: PDF library not properly loaded', 'error');
+            return false;
+        }
+        
+        // Create new jsPDF instance
+        const doc = new jsPDFLib({
+            orientation: headers.length > 5 ? 'l' : 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Set document properties
+        doc.setProperties({
+            title: title,
+            subject: 'AICN Management System Report',
+            author: 'AICN Management System',
+            keywords: 'report, export, pdf',
+            creator: 'AICN Management System'
+        });
+        
+        // Set font and styling
+        doc.setFont('helvetica');
+        
+        // Add title
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        const titleWidth = doc.getTextWidth(title.toUpperCase());
+        const pageWidth = doc.internal.pageSize.width;
+        doc.text(title.toUpperCase(), (pageWidth - titleWidth) / 2, 20);
+        
+        // Add generation date
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const dateText = `Generated on: ${new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        })}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, (pageWidth - dateWidth) / 2, 30);
         
         // Add metadata if provided
+        let yPos = 40;
         if (Object.keys(metadata).length > 0) {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'italic');
             const metadataText = Object.entries(metadata)
                 .map(([key, value]) => `${key}: ${value}`)
                 .join('  |  ');
-                
-            docDefinition.content.push({
-                text: metadataText,
-                style: 'metadata',
-                alignment: 'center',
-                margin: [0, 0, 0, 20]
+            const metadataWidth = doc.getTextWidth(metadataText);
+            doc.text(metadataText, (pageWidth - metadataWidth) / 2, yPos);
+            yPos += 10;
+        }
+        
+        // Add table using autoTable plugin
+        doc.autoTable({
+            head: [headers.map(h => h.toUpperCase())],
+            body: data,
+            startY: yPos,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2
+            },
+            headStyles: {
+                fillColor: [52, 152, 219], // #3498db
+                textColor: [255, 255, 255], // white
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+                fillColor: [248, 249, 250] // #f8f9fa
+            },
+            margin: { top: yPos, left: 10, right: 10 },
+            didDrawPage: function(data) {
+                // Add footer with page numbers
+                const pageCount = doc.internal.getNumberOfPages();
+                const footerText = `AICN Management System | Page ${data.pageNumber} of ${pageCount}`;
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text(footerText, 10, doc.internal.pageSize.height - 10);
+            }
+        });
+        
+        // Add watermark
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(40);
+            doc.setTextColor(224, 224, 224); // #e0e0e0
+            doc.setFont('helvetica', 'bold');
+            doc.text('CONFIDENTIAL', pageWidth / 2, doc.internal.pageSize.height / 2, {
+                angle: 45,
+                align: 'center'
             });
         }
         
-        // Prepare table data with alternating row colors
-        const tableBody = [
-            headers.map(header => ({ text: header.toUpperCase(), style: 'tableHeader' })),
-            ...data.map((row, index) => {
-                const rowStyle = index % 2 === 0 ? {} : { fillColor: '#f8f9fa' };
-                return row.map(cell => ({
-                    text: cell,
-                    style: 'tableCell',
-                    ...rowStyle
-                }));
-            })
-        ];
+        // Save the PDF
+        doc.save(filename);
         
-        // Improved column width calculation
-        const columnWidths = calculateColumnWidths(headers, data, pageOrientation);
-        
-        // Add table to document with improved layout and page breaks
-        docDefinition.content.push({
-            table: {
-                headerRows: 1,
-                widths: columnWidths,
-                body: tableBody,
-                dontBreakRows: true, // Prevent rows from splitting across pages
-                keepWithHeaderRows: 1 // Keep at least 1 row with header on page break
-            },
-            layout: {
-                hLineWidth: function(i, node) {
-                    return (i === 0 || i === node.table.body.length) ? 1.5 : 1;
-                },
-                vLineWidth: function(i, node) {
-                    return (i === 0 || i === node.table.widths.length) ? 1.5 : 0.5;
-                },
-                hLineColor: function(i, node) {
-                    return (i === 0 || i === node.table.body.length) ? '#2c3e50' : '#e1e5e9';
-                },
-                vLineColor: function(i, node) {
-                    return (i === 0 || i === node.table.widths.length) ? '#2c3e50' : '#e1e5e9';
-                },
-                paddingLeft: function(i, node) { return 8; },
-                paddingRight: function(i, node) { return 8; },
-                paddingTop: function(i, node) { return 6; },
-                paddingBottom: function(i, node) { return 6; }
-            },
-            margin: [0, 0, 0, 20]
-        });
-        
-        // Add footer with page numbers and branding
-        docDefinition.footer = function(currentPage, pageCount) {
-            return {
-                columns: [
-                    {
-                        text: 'AICN Management System',
-                        fontSize: 8,
-                        color: '#7f8c8d',
-                        margin: [40, 10, 0, 0]
-                    },
-                    {
-                        text: `Page ${currentPage} of ${pageCount}`,
-                        alignment: 'right',
-                        fontSize: 8,
-                        color: '#7f8c8d',
-                        margin: [0, 10, 40, 0]
-                    }
-                ],
-                margin: [0, 10, 0, 0]
-            };
-        };
-        
-        // Add page header with title and logo on subsequent pages
-        docDefinition.header = function(currentPage, pageCount) {
-            if (currentPage > 1) {
-                return {
-                    columns: [
-                        {
-                            // This would be a logo if we had one
-                            // image: 'logo.png',
-                            // width: 30,
-                            // height: 30
-                        },
-                        {
-                            text: 'AICN Management System',
-                            fontSize: 16,
-                            bold: true,
-                            color: '#2c3e50',
-                            alignment: 'center',
-                            margin: [0, 15, 0, 0]
-                        }
-                    ],
-                    margin: [40, 20, 40, 0]
-                };
-            }
-            return null;
-        };
-        
-        // Add watermark for professional appearance
-        docDefinition.watermark = {
-            text: 'CONFIDENTIAL',
-            color: '#e0e0e0',
-            opacity: 0.3,
-            bold: true,
-            angle: 45
-        };
-        
-        // Generate and download PDF with better error handling
-        console.log('Creating PDF with docDefinition:', JSON.stringify(docDefinition, null, 2));
-        
-        // Create the PDF document with custom font settings to avoid Helvetica-Bold error
-        const pdfDoc = pdfMake.createPdf(docDefinition);
-        
-        // Check if pdfMake is properly loaded
-        if (typeof pdfDoc === 'undefined' || pdfDoc === null) {
-            console.error('pdfMake is not properly loaded');
-            hideLoadingOverlay();
-            showToast('Failed to export as PDF: PDF engine error', 'error');
-            return false;
-        }
-        
-        // Use getBase64 to test if PDF generation works
-        pdfDoc.getBase64(function(base64) {
-            console.log('PDF generated successfully, base64 length:', base64.length);
-            
-            // Now download the PDF
-            try {
-                pdfDoc.download(filename);
-                console.log('PDF download initiated');
-                hideLoadingOverlay();
-                showToast('PDF exported successfully', 'success');
-            } catch (downloadError) {
-                console.error('Error during PDF download:', downloadError);
-                hideLoadingOverlay();
-                showToast('Failed to download PDF: ' + downloadError.message, 'error');
-                // Fallback: open in new window
-                try {
-                    pdfDoc.open();
-                    console.log('PDF opened in new window as fallback');
-                    showToast('PDF opened in new window', 'info');
-                } catch (openError) {
-                    console.error('Error opening PDF in new window:', openError);
-                    showToast('Failed to open PDF: ' + openError.message, 'error');
-                }
-            }
-        }, function(error) {
-            console.error('Error generating PDF:', error);
-            hideLoadingOverlay();
-            showToast('Failed to generate PDF: ' + error.message, 'error');
-            return false;
-        });
-        
+        hideLoadingOverlay();
+        showToast('PDF exported successfully', 'success');
         return true;
     } catch (error) {
         console.error('Failed to export as PDF:', error);
@@ -456,3 +341,8 @@ function exportToCSV(options) {
 window.exportToPDF = exportToPDF;
 window.exportToExcel = exportToExcel;
 window.exportToCSV = exportToCSV;
+
+// Make jsPDF available globally for compatibility
+if (typeof window.jspdf !== 'undefined' && typeof window.jsPDF === 'undefined') {
+    window.jsPDF = window.jspdf.jsPDF;
+}

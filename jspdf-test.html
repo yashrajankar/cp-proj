@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jsPDF Implementation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+    <!-- Include jsPDF and autoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- Include our export utilities -->
+    <script src="./export-utils.js"></script>
+</head>
+<body>
+    <h1>jsPDF Implementation Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Library Loading</h2>
+        <button id="testLibBtn">Check Library Loading</button>
+        <div id="libStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Basic PDF Export</h2>
+        <button id="testExportBtn">Export Sample PDF</button>
+        <div id="exportStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Export Function Integration</h2>
+        <button id="testFunctionBtn">Test exportToPDF Function</button>
+        <div id="functionStatus"></div>
+    </div>
+
+    <script>
+        // Make jsPDF available globally
+        if (typeof window.jspdf !== 'undefined') {
+            window.jsPDF = window.jspdf.jsPDF;
+        }
+
+        // Test 1: Check if libraries are loaded
+        document.getElementById('testLibBtn').addEventListener('click', function() {
+            const statusDiv = document.getElementById('libStatus');
+            
+            if (typeof window.jsPDF !== 'undefined') {
+                statusDiv.innerHTML = '<div class="status success">✓ jsPDF library loaded successfully</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="status error">✗ jsPDF library not loaded</div>';
+            }
+            
+            if (typeof window.jsPDF !== 'undefined' && typeof window.jsPDF().autoTable !== 'undefined') {
+                statusDiv.innerHTML += '<div class="status success">✓ autoTable plugin loaded successfully</div>';
+            } else {
+                statusDiv.innerHTML += '<div class="status success">✓ autoTable plugin will be tested during export</div>';
+            }
+        });
+
+        // Test 2: Basic PDF export
+        document.getElementById('testExportBtn').addEventListener('click', function() {
+            const statusDiv = document.getElementById('exportStatus');
+            
+            try {
+                // Create a simple PDF
+                const doc = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                doc.setFontSize(20);
+                doc.text('Test PDF Document', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text('This is a test PDF generated using jsPDF.', 20, 40);
+                doc.text('Generated on: ' + new Date().toLocaleString(), 20, 50);
+                
+                // Add a simple table
+                doc.autoTable({
+                    head: [['ID', 'Name', 'Email']],
+                    body: [
+                        ['1', 'John Doe', 'john@example.com'],
+                        ['2', 'Jane Smith', 'jane@example.com'],
+                        ['3', 'Bob Johnson', 'bob@example.com']
+                    ],
+                    startY: 60
+                });
+                
+                doc.save('test-document.pdf');
+                statusDiv.innerHTML = '<div class="status success">✓ PDF generated and downloaded successfully</div>';
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">✗ Error generating PDF: ' + error.message + '</div>';
+                console.error('PDF generation error:', error);
+            }
+        });
+
+        // Test 3: Test our exportToPDF function
+        document.getElementById('testFunctionBtn').addEventListener('click', function() {
+            const statusDiv = document.getElementById('functionStatus');
+            
+            try {
+                // Test data
+                const testData = {
+                    title: 'Student Report',
+                    headers: ['ID', 'Name', 'Email', 'Grade'],
+                    data: [
+                        ['001', 'John Doe', 'john@example.com', 'A'],
+                        ['002', 'Jane Smith', 'jane@example.com', 'B+'],
+                        ['003', 'Bob Johnson', 'bob@example.com', 'A-']
+                    ],
+                    filename: 'student-report.pdf',
+                    metadata: {
+                        'Total Students': 3,
+                        'Report Type': 'Academic'
+                    }
+                };
+                
+                // Call our export function
+                const result = exportToPDF(testData);
+                
+                if (result) {
+                    statusDiv.innerHTML = '<div class="status success">✓ exportToPDF function executed successfully</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">✗ exportToPDF function failed</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">✗ Error in exportToPDF function: ' + error.message + '</div>';
+                console.error('exportToPDF error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1545,188 +1545,158 @@ async function exportAssignmentsAsPDF(allocations) {
     try {
         showLoading('Exporting assignments as PDF...');
         
-        // Prepare data for PDF with enhanced styling
-        const docDefinition = {
-            pageSize: 'A4',
-            pageOrientation: 'portrait',
-            pageMargins: [40, 60, 40, 60],
-            content: [
-                {
-                    text: 'INVIGILATOR ASSIGNMENTS REPORT',
-                    style: 'header',
-                    alignment: 'center'
-                },
-                {
-                    text: `Generated on: ${new Date().toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    })}`,
-                    style: 'subheader',
-                    alignment: 'center',
-                    margin: [0, 0, 0, 30]
-                }
-            ],
-            styles: {
-                header: {
-                    fontSize: 22,
-                    bold: true,
-                    margin: [0, 0, 0, 15],
-                    color: '#2c3e50'
-                },
-                subheader: {
-                    fontSize: 14,
-                    bold: true,
-                    margin: [0, 15, 0, 10],
-                    color: '#7f8c8d'
-                },
-                sectionHeader: {
-                    fontSize: 16,
-                    bold: true,
-                    margin: [0, 25, 0, 15],
-                    color: '#3498db',
-                    decoration: 'underline'
-                },
-                tableHeader: {
-                    bold: true,
-                    fontSize: 11,
-                    color: '#ffffff',
-                    fillColor: '#3498db',
-                    alignment: 'center'
-                },
-                tableCell: {
-                    fontSize: 10,
-                    color: '#2c3e50'
-                },
-                metadata: {
-                    fontSize: 10,
-                    italics: true,
-                    color: '#95a5a6',
-                    margin: [0, 0, 0, 5]
-                }
-            },
-            defaultStyle: {
-                fontSize: 10,
-                color: '#34495e'
-            }
-        };
+        // Check if jsPDF is available
+        if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+            throw new Error('jsPDF library is not loaded');
+        }
         
-        // Add assignments data to PDF
+        // Initialize jsPDF (handle both global and module versions)
+        let jsPDFLib;
+        if (typeof window.jspdf !== 'undefined') {
+            // Modern version (as UMD module)
+            jsPDFLib = window.jspdf.jsPDF;
+        } else {
+            // Legacy version (as global)
+            jsPDFLib = window.jsPDF;
+        }
+        
+        // Create new jsPDF instance
+        const doc = new jsPDFLib({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Set document properties
+        doc.setProperties({
+            title: 'Invigilator Assignments Report',
+            subject: 'AICN Management System Report',
+            author: 'AICN Management System',
+            keywords: 'assignments, report, export, pdf',
+            creator: 'AICN Management System'
+        });
+        
+        // Add title
+        doc.setFont('helvetica');
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        const title = 'INVIGILATOR ASSIGNMENTS REPORT';
+        const titleWidth = doc.getTextWidth(title);
+        const pageWidth = doc.internal.pageSize.width;
+        doc.text(title, (pageWidth - titleWidth) / 2, 20);
+        
+        // Add generation date
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const dateText = `Generated on: ${new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        })}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, (pageWidth - dateWidth) / 2, 30);
+        
+        // Process each allocation
+        let yPos = 40;
         if (allocations && allocations.length > 0) {
             allocations.forEach((allocation, index) => {
                 const allocationData = allocation.allocationData || {};
                 const allocationDate = allocation.date || 'Unknown Date';
                 
-                // Add section header for this allocation
-                if (allocations.length > 1) {
-                    docDefinition.content.push({
-                        text: `Assignment Set ${index + 1}: ${allocationDate}`,
-                        style: 'sectionHeader'
-                    });
-                } else {
-                    docDefinition.content.push({
-                        text: `Assignments for ${allocationDate}`,
-                        style: 'sectionHeader'
-                    });
+                // Check if we need a new page
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
                 }
                 
+                // Add section header
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                const sectionTitle = allocations.length > 1 ? 
+                    `Assignment Set ${index + 1}: ${allocationDate}` : 
+                    `Assignments for ${allocationDate}`;
+                doc.text(sectionTitle, 10, yPos);
+                yPos += 10;
+                
                 // Prepare table data
-                const tableBody = [
-                    [
-                        { text: 'DAY', style: 'tableHeader' },
-                        { text: 'ROOM', style: 'tableHeader' },
-                        { text: 'STAFF MEMBER', style: 'tableHeader' }
-                    ]
-                ];
+                const headers = ['Day', 'Room', 'Staff Member'];
+                const rows = [];
                 
                 // Process allocation data
-                let assignmentCount = 0;
                 Object.keys(allocationData).forEach(day => {
                     const dayAssignments = allocationData[day];
                     if (typeof dayAssignments === 'object') {
                         Object.keys(dayAssignments).forEach(room => {
-                            const staffName = dayAssignments[room] || 'Unassigned';
-                            tableBody.push([
-                                { text: day, style: 'tableCell' },
-                                { text: room, style: 'tableCell' },
-                                { text: staffName, style: 'tableCell' }
-                            ]);
-                            assignmentCount++;
+                            const staffName = dayAssignments[room];
+                            rows.push([day, room, staffName]);
                         });
                     }
                 });
                 
-                // Add metadata about this assignment set
-                docDefinition.content.push({
-                    text: `Total Assignments: ${assignmentCount}`,
-                    style: 'metadata',
-                    alignment: 'right'
-                });
+                // Add table if we have data
+                if (rows.length > 0) {
+                    doc.autoTable({
+                        head: [headers],
+                        body: rows,
+                        startY: yPos,
+                        styles: {
+                            fontSize: 8,
+                            cellPadding: 2
+                        },
+                        headStyles: {
+                            fillColor: [52, 152, 219], // #3498db
+                            textColor: [255, 255, 255], // white
+                            fontStyle: 'bold'
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 249, 250] // #f8f9fa
+                        },
+                        margin: { top: yPos, left: 10, right: 10 }
+                    });
+                    
+                    // Update Y position
+                    yPos = doc.lastAutoTable.finalY + 10;
+                }
                 
-                // Add table to document
-                docDefinition.content.push({
-                    table: {
-                        headerRows: 1,
-                        widths: ['*', 'auto', '*'],
-                        body: tableBody
-                    },
-                    layout: {
-                        hLineWidth: function(i, node) {
-                            return (i === 0 || i === node.table.body.length) ? 2 : 1;
-                        },
-                        vLineWidth: function(i, node) {
-                            return (i === 0 || i === node.table.widths.length) ? 2 : 1;
-                        },
-                        hLineColor: function(i, node) {
-                            return (i === 0 || i === node.table.body.length) ? '#2c3e50' : '#e1e5e9';
-                        },
-                        vLineColor: function(i, node) {
-                            return (i === 0 || i === node.table.widths.length) ? '#2c3e50' : '#e1e5e9';
-                        },
-                        paddingLeft: function(i, node) { return 10; },
-                        paddingRight: function(i, node) { return 10; },
-                        paddingTop: function(i, node) { return 8; },
-                        paddingBottom: function(i, node) { return 8; }
-                    },
-                    margin: [0, 0, 0, 20]
-                });
+                // Add count
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Total Assignments: ${rows.length}`, 10, yPos);
+                yPos += 15;
             });
         } else {
             // No assignments message
-            docDefinition.content.push({
-                text: 'No assignments available to export.',
-                style: 'subheader',
-                alignment: 'center',
-                margin: [0, 50, 0, 0]
-            });
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('No assignments available to export.', 10, yPos);
         }
         
         // Add footer with page numbers
-        docDefinition.footer = function(currentPage, pageCount) {
-            return {
-                columns: [
-                    {
-                        text: 'AICN Invigilator Assignment System',
-                        fontSize: 8,
-                        color: '#7f8c8d',
-                        margin: [40, 10, 0, 0]
-                    },
-                    {
-                        text: `Page ${currentPage} of ${pageCount}`,
-                        alignment: 'right',
-                        fontSize: 8,
-                        color: '#7f8c8d',
-                        margin: [0, 10, 40, 0]
-                    }
-                ],
-                margin: [0, 10, 0, 0]
-            };
-        };
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            const footerText = `AICN Management System | Page ${i} of ${totalPages}`;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(footerText, 10, doc.internal.pageSize.height - 10);
+        }
         
-        // Generate and download PDF
+        // Add watermark
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(40);
+            doc.setTextColor(224, 224, 224); // #e0e0e0
+            doc.setFont('helvetica', 'bold');
+            doc.text('CONFIDENTIAL', pageWidth / 2, doc.internal.pageSize.height / 2, {
+                angle: 45,
+                align: 'center'
+            });
+        }
+        
+        // Save the PDF with timestamp
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-        pdfMake.createPdf(docDefinition).download(`invigilator_assignments_${timestamp}.pdf`);
+        doc.save(`invigilator_assignments_${timestamp}.pdf`);
         
         hideLoading();
         showToast('Assignments exported as PDF successfully', 'success');

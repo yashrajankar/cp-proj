@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Export Test</title>
+    <!-- PDF and Excel Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Export Utilities -->
+    <script src="export-utils.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Export Test</h1>
+        <p>Click the button below to test PDF export functionality:</p>
+        
+        <button class="btn" onclick="testPDFExport()">Test PDF Export</button>
+        <button class="btn" onclick="testLargePDFExport()">Test Large PDF Export</button>
+        
+        <div class="result" id="result">
+            <p>Results will appear here...</p>
+        </div>
+    </div>
+
+    <script>
+        function testPDFExport() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing PDF export...</p>';
+            
+            // Sample data for testing
+            const headers = ['ID', 'Name', 'Email', 'Department'];
+            const data = [
+                ['001', 'John Doe', 'john@example.com', 'Engineering'],
+                ['002', 'Jane Smith', 'jane@example.com', 'Marketing'],
+                ['003', 'Bob Johnson', 'bob@example.com', 'Sales'],
+                ['004', 'Alice Brown', 'alice@example.com', 'HR'],
+                ['005', 'Charlie Wilson', 'charlie@example.com', 'Finance']
+            ];
+            
+            const metadata = {
+                'Total Records': data.length,
+                'Export Date': new Date().toLocaleDateString()
+            };
+            
+            try {
+                const success = exportToPDF({
+                    title: 'Employee Report',
+                    headers: headers,
+                    data: data,
+                    filename: 'employee_report.pdf',
+                    metadata: metadata
+                });
+                
+                if (success) {
+                    resultDiv.innerHTML = '<p style="color: green;">PDF export initiated successfully!</p>';
+                } else {
+                    resultDiv.innerHTML = '<p style="color: red;">Failed to initiate PDF export.</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error during PDF export: ${error.message}</p>`;
+                console.error('Error during PDF export:', error);
+            }
+        }
+        
+        function testLargePDFExport() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing large PDF export...</p>';
+            
+            // Generate larger dataset for testing
+            const headers = ['ID', 'Name', 'Email', 'Department', 'Position', 'Salary'];
+            const data = [];
+            
+            // Generate 100 rows of sample data
+            for (let i = 1; i <= 100; i++) {
+                data.push([
+                    `EMP${String(i).padStart(3, '0')}`,
+                    `Employee ${i}`,
+                    `employee${i}@company.com`,
+                    ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'][Math.floor(Math.random() * 5)],
+                    ['Manager', 'Developer', 'Analyst', 'Coordinator', 'Specialist'][Math.floor(Math.random() * 5)],
+                    `$${(50000 + Math.random() * 100000).toFixed(2)}`
+                ]);
+            }
+            
+            const metadata = {
+                'Total Records': data.length,
+                'Export Date': new Date().toLocaleDateString()
+            };
+            
+            try {
+                const success = exportToPDF({
+                    title: 'Large Employee Report',
+                    headers: headers,
+                    data: data,
+                    filename: 'large_employee_report.pdf',
+                    metadata: metadata
+                });
+                
+                if (success) {
+                    resultDiv.innerHTML = '<p style="color: green;">Large PDF export initiated successfully!</p>';
+                } else {
+                    resultDiv.innerHTML = '<p style="color: red;">Failed to initiate large PDF export.</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error during large PDF export: ${error.message}</p>`;
+                console.error('Error during large PDF export:', error);
+            }
+        }
+    </script>
+</body>
+</html>

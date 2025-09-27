@@ -32,6 +32,8 @@
 /* Section Headers */
 .section-header {
     margin: var(--space-4) 0 var(--space-3) 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-100);
 }
 
 .section-header h2 {
@@ -42,6 +44,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    margin: 0;
 }
 
 /* Summary Stats */
@@ -53,9 +56,9 @@
 }
 
 .stat-card {
-    background: linear-gradient(135deg, var(--white), var(--gray-50));
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 25px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
     transition: all 0.3s ease;
@@ -66,55 +69,55 @@
 .stat-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--primary-200);
 }
 
 .stat-icon {
     width: 60px;
     height: 60px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: var(--space-4);
+    margin-right: 20px;
     font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
 .stat-icon.students-icon {
-    background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
-    color: var(--primary-700);
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary);
 }
 
 .stat-icon.timetable-icon {
-    background: linear-gradient(135deg, #f57c00, #e65100);
-    color: white;
+    background: rgba(124, 58, 237, 0.1);
+    color: var(--secondary);
 }
 
 .stat-icon.room-icon {
-    background: linear-gradient(135deg, #388e3c, #1b5e20);
-    color: white;
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--accent);
 }
 
 .stat-content h3 {
     font-family: var(--font-heading);
     font-size: 2rem;
     font-weight: 700;
-    margin: 0 0 var(--space-1) 0;
-    color: var(--gray-800);
+    margin: 0 0 5px 0;
+    color: var(--gray-900);
 }
 
 .stat-content p {
     margin: 0;
     color: var(--gray-600);
-    font-weight: 500;
+    font-size: 1rem;
 }
 
 /* Data Summary Sections */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 .dashboard-grid .full-width {
@@ -266,14 +269,14 @@
 .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 .dashboard-widget {
-    background: linear-gradient(135deg, var(--white), var(--gray-50));
-    border-radius: var(--radius-xl);
-    padding: var(--space-5);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 25px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
     transition: all 0.3s ease;
@@ -281,9 +284,8 @@
 }
 
 .dashboard-widget:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--primary-200);
 }
 
 .dashboard-widget.full-width {
@@ -292,21 +294,17 @@
 
 .dashboard-widget h3 {
     font-family: var(--font-heading);
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 600;
-    margin: 0 0 var(--space-3) 0;
+    margin: 0 0 15px 0;
     color: var(--gray-800);
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-}
-
-.dashboard-widget h3 i {
-    color: var(--primary-600);
+    gap: 10px;
 }
 
 .dashboard-widget p {
-    margin: 0 0 var(--space-4) 0;
+    margin: 0 0 20px 0;
     color: var(--gray-600);
     line-height: 1.6;
 }
@@ -314,20 +312,21 @@
 .widget-btn {
     width: 100%;
     justify-content: center;
+    margin: 0;
 }
 
 /* Info Cards */
 .info-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
     margin-bottom: var(--space-4);
 }
 
 .info-card {
-    background: linear-gradient(135deg, var(--white), var(--gray-50));
-    border-radius: var(--radius-xl);
-    padding: var(--space-4);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 25px;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
     display: flex;
@@ -338,34 +337,34 @@
 .info-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--primary-200);
 }
 
 .info-card-icon {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
-    color: var(--primary-700);
+    border-radius: var(--radius-full);
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
-    margin-right: var(--space-3);
+    margin-right: 20px;
+    flex-shrink: 0;
 }
 
 .info-card-content h3 {
     font-family: var(--font-heading);
     font-size: 1.1rem;
     font-weight: 600;
-    margin: 0 0 var(--space-1) 0;
+    margin: 0 0 8px 0;
     color: var(--gray-800);
 }
 
 .info-card-content p {
     margin: 0;
     color: var(--gray-600);
-    font-weight: 500;
+    font-size: 0.95rem;
 }
 
 /* Status Indicators */
@@ -570,5 +569,9 @@
     
     .seating-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        margin: 20px 0 15px 0;
     }
 }

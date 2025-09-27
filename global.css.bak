@@ -1,10 +1,5 @@
-/* Global Styles for Consistent UI Across All Pages */
-
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
 :root {
-    /* Colors */
+    /* Enhanced Primary Color Palette - Professional Blue Theme */
     --primary: #2563eb;
     --primary-50: #eff6ff;
     --primary-100: #dbeafe;
@@ -41,6 +36,7 @@
     --accent-800: #075985;
     --accent-900: #0c4a6e;
     
+    /* Status Colors */
     --success: #10b981;
     --success-50: #f0fdf4;
     --success-100: #dcfce7;
@@ -89,6 +85,19 @@
     --info-800: #1e40af;
     --info-900: #1e3a8a;
     
+    --error: #ef4444;
+    --error-50: #fef2f2;
+    --error-100: #fee2e2;
+    --error-200: #fecaca;
+    --error-300: #fca5a5;
+    --error-400: #f87171;
+    --error-500: #ef4444;
+    --error-600: #dc2626;
+    --error-700: #b91c1c;
+    --error-800: #991b1b;
+    --error-900: #7f1d1d;
+    
+    /* Neutral Colors */
     --white: #ffffff;
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
@@ -102,7 +111,7 @@
     --gray-900: #111827;
     --black: #000000;
     
-    /* Spacing */
+    /* Spacing Scale - 4px increment system */
     --space-0: 0;
     --space-1: 0.25rem;   /* 4px */
     --space-2: 0.5rem;    /* 8px */
@@ -115,7 +124,7 @@
     --space-9: 6rem;      /* 96px */
     --space-10: 8rem;     /* 128px */
     --space-11: 10rem;    /* 160px */
-    --space-12: 12rem;    /* 192px */
+    --space-12: 12rem;
     
     /* Typography */
     --font-heading: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -170,19 +179,32 @@
     --z-modal: 1050;
     --z-popover: 1060;
     --z-tooltip: 1070;
+    
+    /* Breakpoints */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
 }
 
-* {
-    margin: 0;
-    padding: 0;
+/* Reset and Base Styles */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 body {
     font-family: var(--font-body);
-    background-color: var(--gray-50);
-    color: var(--gray-800);
+    font-size: var(--text-base);
     line-height: 1.6;
+    color: var(--gray-800);
+    background-color: var(--gray-50);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Headings */
@@ -254,8 +276,8 @@ a:hover {
     box-shadow: var(--shadow-xs);
     position: relative;
     overflow: hidden;
-    min-width: 100px;
-    height: 40px;
+    min-width: 100px; /* Consistent minimum width */
+    height: 40px; /* Consistent height */
     background-color: var(--white);
     color: var(--gray-700);
     border: 1px solid var(--gray-300);

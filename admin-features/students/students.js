@@ -654,14 +654,68 @@ async function exportStudentsAsPDF() {
     try {
         showLoadingOverlay('Exporting students as PDF...');
         
-        // Ensure we have the latest data
-        if (studentsData.length === 0) {
-            await loadStudentsData();
+        // First try to fetch ALL students data
+        let allStudentsData = [];
+        let hasMoreData = true;
+        let page = 1;
+        const limit = 100; // Smaller batch size for better performance
+        
+        // Fetch all data in batches
+        while (hasMoreData) {
+            try {
+                console.log(`Fetching students page ${page}`);
+                const response = await fetchData(`students?page=${page}&limit=${limit}`);
+                
+                // Handle different response formats
+                let batchData = [];
+                if (Array.isArray(response)) {
+                    batchData = response;
+                } else if (response && response.data) {
+                    batchData = response.data;
+                } else if (response && response.students) {
+                    batchData = response.students;
+                } else {
+                    // If we can't parse the response, stop fetching
+                    hasMoreData = false;
+                    break;
+                }
+                
+                console.log(`Received ${batchData.length} students in page ${page}`);
+                
+                if (batchData.length === 0) {
+                    hasMoreData = false;
+                } else {
+                    allStudentsData = allStudentsData.concat(batchData);
+                    // If we got less than the limit, this is the last page
+                    if (batchData.length < limit) {
+                        hasMoreData = false;
+                    } else {
+                        page++;
+                    }
+                }
+                
+                // Safety check to prevent infinite loops
+                if (page > 100) {
+                    console.warn('Too many pages, stopping export');
+                    hasMoreData = false;
+                }
+            } catch (error) {
+                console.error('Error fetching batch data:', error);
+                hasMoreData = false;
+            }
         }
+        
+        // If no data fetched, use currently loaded data as fallback
+        if (allStudentsData.length === 0) {
+            console.log('Using fallback data from current view');
+            allStudentsData = studentsData;
+        }
+        
+        console.log('Total students to export:', allStudentsData.length);
         
         // Prepare data for export
         const headers = ['Roll No', 'Name', 'Section', 'Email', 'Phone'];
-        const data = studentsData.map(student => [
+        const data = allStudentsData.map(student => [
             student.rollNo || '',
             student.name || '',
             student.section || '',
@@ -670,13 +724,18 @@ async function exportStudentsAsPDF() {
         ]);
         
         const metadata = {
-            'Total Students': studentsData.length,
-            'Export Format': 'PDF'
+            'Total Students': allStudentsData.length,
+            'Export Format': 'PDF',
+            'Export Date': new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })
         };
         
         // Export using the standardized utility
-        // Note: exportToPDF now works asynchronously with callbacks
-        exportToPDF({
+        const success = exportToPDF({
             title: 'Student Management Report',
             headers,
             data,
@@ -684,6 +743,10 @@ async function exportStudentsAsPDF() {
             metadata
         });
         
+        if (!success) {
+            hideLoadingOverlay();
+            showToast('Failed to export students as PDF', 'error');
+        }
         // Don't hide the loading overlay here since exportToPDF is asynchronous
         // The overlay and success message will be handled by the callback in exportToPDF
     } catch (error) {
@@ -698,14 +761,68 @@ async function exportStudentsAsExcel() {
     try {
         showLoadingOverlay('Exporting students as Excel...');
         
-        // Ensure we have the latest data
-        if (studentsData.length === 0) {
-            await loadStudentsData();
+        // First try to fetch ALL students data
+        let allStudentsData = [];
+        let hasMoreData = true;
+        let page = 1;
+        const limit = 100; // Smaller batch size for better performance
+        
+        // Fetch all data in batches
+        while (hasMoreData) {
+            try {
+                console.log(`Fetching students page ${page}`);
+                const response = await fetchData(`students?page=${page}&limit=${limit}`);
+                
+                // Handle different response formats
+                let batchData = [];
+                if (Array.isArray(response)) {
+                    batchData = response;
+                } else if (response && response.data) {
+                    batchData = response.data;
+                } else if (response && response.students) {
+                    batchData = response.students;
+                } else {
+                    // If we can't parse the response, stop fetching
+                    hasMoreData = false;
+                    break;
+                }
+                
+                console.log(`Received ${batchData.length} students in page ${page}`);
+                
+                if (batchData.length === 0) {
+                    hasMoreData = false;
+                } else {
+                    allStudentsData = allStudentsData.concat(batchData);
+                    // If we got less than the limit, this is the last page
+                    if (batchData.length < limit) {
+                        hasMoreData = false;
+                    } else {
+                        page++;
+                    }
+                }
+                
+                // Safety check to prevent infinite loops
+                if (page > 100) {
+                    console.warn('Too many pages, stopping export');
+                    hasMoreData = false;
+                }
+            } catch (error) {
+                console.error('Error fetching batch data:', error);
+                hasMoreData = false;
+            }
         }
+        
+        // If no data fetched, use currently loaded data as fallback
+        if (allStudentsData.length === 0) {
+            console.log('Using fallback data from current view');
+            allStudentsData = studentsData;
+        }
+        
+        console.log('Total students to export:', allStudentsData.length);
         
         // Prepare data for export
         const headers = ['Roll No', 'Name', 'Section', 'Email', 'Phone'];
-        const data = studentsData.map(student => [
+        const data = allStudentsData.map(student => [
             student.rollNo || '',
             student.name || '',
             student.section || '',
@@ -714,8 +831,14 @@ async function exportStudentsAsExcel() {
         ]);
         
         const metadata = {
-            'Total Students': studentsData.length,
-            'Export Format': 'Excel'
+            'Total Students': allStudentsData.length,
+            'Export Format': 'Excel',
+            'Export Date': new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })
         };
         
         // Export using the standardized utility
@@ -746,14 +869,68 @@ async function exportStudentsAsCSV() {
     try {
         showLoadingOverlay('Exporting students as CSV...');
         
-        // Ensure we have the latest data
-        if (studentsData.length === 0) {
-            await loadStudentsData();
+        // First try to fetch ALL students data
+        let allStudentsData = [];
+        let hasMoreData = true;
+        let page = 1;
+        const limit = 100; // Smaller batch size for better performance
+        
+        // Fetch all data in batches
+        while (hasMoreData) {
+            try {
+                console.log(`Fetching students page ${page}`);
+                const response = await fetchData(`students?page=${page}&limit=${limit}`);
+                
+                // Handle different response formats
+                let batchData = [];
+                if (Array.isArray(response)) {
+                    batchData = response;
+                } else if (response && response.data) {
+                    batchData = response.data;
+                } else if (response && response.students) {
+                    batchData = response.students;
+                } else {
+                    // If we can't parse the response, stop fetching
+                    hasMoreData = false;
+                    break;
+                }
+                
+                console.log(`Received ${batchData.length} students in page ${page}`);
+                
+                if (batchData.length === 0) {
+                    hasMoreData = false;
+                } else {
+                    allStudentsData = allStudentsData.concat(batchData);
+                    // If we got less than the limit, this is the last page
+                    if (batchData.length < limit) {
+                        hasMoreData = false;
+                    } else {
+                        page++;
+                    }
+                }
+                
+                // Safety check to prevent infinite loops
+                if (page > 100) {
+                    console.warn('Too many pages, stopping export');
+                    hasMoreData = false;
+                }
+            } catch (error) {
+                console.error('Error fetching batch data:', error);
+                hasMoreData = false;
+            }
         }
+        
+        // If no data fetched, use currently loaded data as fallback
+        if (allStudentsData.length === 0) {
+            console.log('Using fallback data from current view');
+            allStudentsData = studentsData;
+        }
+        
+        console.log('Total students to export:', allStudentsData.length);
         
         // Prepare data for export
         const headers = ['Roll No', 'Name', 'Section', 'Email', 'Phone'];
-        const data = studentsData.map(student => [
+        const data = allStudentsData.map(student => [
             student.rollNo || '',
             student.name || '',
             student.section || '',
@@ -762,8 +939,14 @@ async function exportStudentsAsCSV() {
         ]);
         
         const metadata = {
-            'Total Students': studentsData.length,
-            'Export Format': 'CSV'
+            'Total Students': allStudentsData.length,
+            'Export Format': 'CSV',
+            'Export Date': new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })
         };
         
         // Export using the standardized utility

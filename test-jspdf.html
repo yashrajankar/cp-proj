@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jsPDF Test</title>
+    <link rel="stylesheet" href="../admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>jsPDF Test</h1>
+        <button id="testPdfBtn" class="btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Test PDF Export
+        </button>
+    </div>
+
+    <script>
+        // Make jsPDF available globally
+        if (typeof window.jspdf !== 'undefined') {
+            window.jsPDF = window.jspdf.jsPDF;
+        }
+
+        document.getElementById('testPdfBtn').addEventListener('click', function() {
+            try {
+                // Test data
+                const options = {
+                    title: 'Test Report',
+                    headers: ['ID', 'Name', 'Email', 'Department'],
+                    data: [
+                        ['001', 'John Doe', 'john@example.com', 'IT'],
+                        ['002', 'Jane Smith', 'jane@example.com', 'HR'],
+                        ['003', 'Bob Johnson', 'bob@example.com', 'Finance']
+                    ],
+                    filename: 'test-report.pdf',
+                    metadata: {
+                        'Total Records': 3,
+                        'Export Format': 'PDF'
+                    }
+                };
+
+                // Test the export function
+                if (typeof exportToPDF !== 'undefined') {
+                    exportToPDF(options);
+                } else {
+                    // Direct implementation for testing
+                    const doc = new jsPDF({
+                        orientation: 'p',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    doc.setFontSize(22);
+                    doc.text('Test Report', 105, 20, { align: 'center' });
+
+                    doc.autoTable({
+                        head: [options.headers],
+                        body: options.data,
+                        startY: 30
+                    });
+
+                    doc.save(options.filename);
+                    alert('PDF generated successfully!');
+                }
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
