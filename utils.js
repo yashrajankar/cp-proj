@@ -281,8 +281,8 @@ window.fetchData = async function fetchData(endpoint, options = {}, retries = MA
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const isProduction = !isFileProtocol && !isLocalhost;
         
-        // Always use localhost:3003 for API calls in development (updated port)
-        const baseURL = 'http://localhost:3003';
+        // Always use localhost:3000 for API calls in development (updated port)
+        const baseURL = 'http://localhost:3000';
         
         if (endpoint.startsWith('http')) {
             // Full URL - use as is
@@ -613,6 +613,65 @@ window.generateCSV = function generateCSV(data, headers = null) {
   });
   
   return csv;
+};
+
+// Function to parse Excel files
+window.parseExcel = async function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      try {
+        // Read the Excel file
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Get the first worksheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (jsonData.length === 0) {
+          reject(new Error('Excel file is empty'));
+          return;
+        }
+        
+        // Extract headers (first row)
+        const headers = jsonData[0];
+        
+        // Process data rows
+        const dataRows = [];
+        for (let i = 1; i < jsonData.length; i++) {
+          const row = {};
+          const rowData = jsonData[i];
+          
+          // Map each cell to its corresponding header
+          for (let j = 0; j < headers.length; j++) {
+            const header = headers[j];
+            const value = rowData[j] !== undefined ? rowData[j] : '';
+            row[header] = value;
+          }
+          
+          dataRows.push(row);
+        }
+        
+        resolve({
+          headers: headers,
+          data: dataRows
+        });
+      } catch (error) {
+        reject(new Error(`Failed to parse Excel file: ${error.message}`));
+      }
+    };
+    
+    reader.onerror = function() {
+      reject(new Error('Failed to read Excel file'));
+    };
+    
+    reader.readAsArrayBuffer(file);
+  });
 };
 
 // ========== END CSV UTILITY FUNCTIONS ==========

@@ -61,7 +61,7 @@ async function login(userType) {
             : { rollNo: username, password };
         
         // Make API request with timeout
-        const apiUrl = `http://localhost:3003/api/auth/${userType}/login`;
+        const apiUrl = `http://localhost:3000/api/auth/${userType}/login`;
         
         // Create a timeout promise
         const timeoutPromise = new Promise((_, reject) => 

@@ -583,17 +583,92 @@ function openImportModal() {
     }
 }
 
+// Parse CSV file for timetable data
+async function parseTimetableCSVFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target.result;
+                // Handle different line endings (Windows \r\n, Unix \n, Mac \r)
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                
+                if (lines.length === 0) {
+                    reject(new Error('CSV file is empty'));
+                    return;
+                }
+                
+                const headers = lines[0].split(',').map(h => h.trim().replace(/["']+/g, ''));
+                
+                const exams = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    // Handle quoted values that may contain commas
+                    const values = parseCSVLine(lines[i]);
+                    const exam = {};
+                    
+                    headers.forEach((header, index) => {
+                        // Clean value by trimming whitespace and removing quotes and trailing carriage returns
+                        const value = values[index] ? values[index].trim().replace(/["']+/g, '').replace(/\r$/, '') : '';
+                        switch (header.toLowerCase()) {
+                            case 'code':
+                            case 'exam code':
+                                exam.code = value;
+                                break;
+                            case 'subject':
+                            case 'exam subject':
+                                exam.subject = value;
+                                break;
+                            case 'date':
+                            case 'exam date':
+                                exam.date = value;
+                                break;
+                            case 'time':
+                            case 'exam time':
+                                exam.time = value;
+                                break;
+                            case 'status':
+                            case 'exam status':
+                                exam.status = value || 'Scheduled';
+                                break;
+                        }
+                    });
+                    
+                    // Only add if we have required fields (code, subject, date, time)
+                    if (exam.code && exam.subject && exam.date && exam.time) {
+                        // Validate status value
+                        if (exam.status && !['Scheduled', 'Completed', 'Cancelled'].includes(exam.status)) {
+                            exam.status = 'Scheduled'; // Default to scheduled
+                        }
+                        exams.push(exam);
+                    }
+                }
+                
+                resolve(exams);
+            } catch (error) {
+                reject(new Error(`Failed to parse CSV: ${error.message}`));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
+// Handle timetable import submission
 async function handleImportSubmit(event) {
     event.preventDefault();
     
     try {
-        const formData = new FormData(event.target);
-        const file = formData.get('csvFile');
+        const form = event.target;
+        const formData = new FormData(form);
+        const fileInput = form.querySelector('#csvFile');
+        const file = fileInput ? fileInput.files[0] : null;
         // Fix checkbox handling - it returns "on" when checked, null when unchecked
         const overwriteData = formData.get('overwriteData') === 'on';
         
         if (!file) {
-            showError('No file selected. Please choose a CSV file to import.');
+            showError('No file selected. Please choose a CSV or Excel file to import.');
             // Add visual feedback to highlight the file input
             const fileInput = document.getElementById('csvFile');
             if (fileInput) {
@@ -611,8 +686,50 @@ async function handleImportSubmit(event) {
         }
         
         // Check file type
-        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            showError('Please select a valid CSV file.');
+        let examsData;
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            // Parse CSV file
+            examsData = await parseTimetableCSVFile(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                   file.type === 'application/vnd.ms-excel' || 
+                   file.name.endsWith('.xlsx') || 
+                   file.name.endsWith('.xls')) {
+            // Parse Excel file
+            const fileData = await parseExcel(file);
+            examsData = fileData.data.map(row => {
+                const exam = {};
+                
+                // Map headers to exam properties
+                Object.keys(row).forEach(header => {
+                    const value = row[header] ? String(row[header]).trim().replace(/\r$/, '') : '';
+                    switch (header.toLowerCase()) {
+                        case 'code':
+                        case 'exam code':
+                            exam.code = value;
+                            break;
+                        case 'subject':
+                        case 'exam subject':
+                            exam.subject = value;
+                            break;
+                        case 'date':
+                        case 'exam date':
+                            exam.date = value;
+                            break;
+                        case 'time':
+                        case 'exam time':
+                            exam.time = value;
+                            break;
+                        case 'status':
+                        case 'exam status':
+                            exam.status = value || 'Scheduled';
+                            break;
+                    }
+                });
+                
+                return exam;
+            }).filter(e => e.code && e.subject && e.date && e.time); // Filter out invalid exams
+        } else {
+            showError('Please select a valid CSV or Excel file.');
             return;
         }
         
@@ -622,214 +739,69 @@ async function handleImportSubmit(event) {
         importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
         importBtn.disabled = true;
         
-        // Parse CSV file
-        const parsedData = await parseCSVFile(file);
-        console.log('Parsed timetable entries:', parsedData);
+        console.log('Parsed exams:', examsData);
         
-        if (parsedData.length === 0) {
-            showError('No valid timetable entries found in the file. Please check that your CSV file contains the required columns: Code, Subject, Date, Time, and Status.');
+        if (examsData.length === 0) {
+            showError('No valid exams found in the file. Please check the file format and try again.');
             importBtn.innerHTML = originalBtnText;
             importBtn.disabled = false;
             return;
         }
         
-        // Import data using the standardized import endpoint
-        const requestData = { data: parsedData, overwrite: overwriteData };
-        console.log('Request data being sent to server:', JSON.stringify(requestData, null, 2));
+        // Validate that we have at least some exams with required fields
+        const validExams = examsData.filter(e => e.code && e.subject && e.date && e.time);
+        if (validExams.length === 0) {
+            showError('No exams with required fields (Code, Subject, Date, Time) found in the file.');
+            importBtn.innerHTML = originalBtnText;
+            importBtn.disabled = false;
+            return;
+        }
         
-        const response = await fetchData('import/timetables', {
+        if (overwriteData) {
+            // Clear existing data first if overwrite is selected
+            await fetchData('timetables', {
+                method: 'DELETE'
+            });
+        }
+        
+        // Add exams to the database
+        // Use bulk import endpoint for better performance
+        const result = await fetchData('timetables/bulk', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestData)
+            body: JSON.stringify(examsData)
         });
-        
-        console.log('Server response:', response);
         
         closeModal();
         await loadTimetableData();
         updateStats();
         
         // Show detailed success message
-        const successCount = response.results ? response.results.filter(r => r.success).length : parsedData.length;
-        const failedCount = response.results ? response.results.filter(r => !r.success).length : 0;
+        const successCount = result.results ? result.results.filter(r => r.success).length : examsData.length;
+        const failedCount = result.results ? result.results.filter(r => !r.success).length : 0;
         
         if (failedCount > 0) {
-            showWarning(`Timetable import completed: ${successCount} successful, ${failedCount} failed. Check the console for details.`);
+            showWarning(`Exams import completed: ${successCount} successful, ${failedCount} failed. Check the console for details.`);
         } else {
-            showSuccess(`Timetable imported successfully (${successCount} entries)`);
+            showSuccess(`Exams imported successfully (${successCount} exams)`);
         }
         
         // Reset button state
         importBtn.innerHTML = originalBtnText;
         importBtn.disabled = false;
     } catch (error) {
-        console.error('Failed to import timetable:', error);
-        showError('Failed to import timetable: ' + error.message);
+        console.error('Failed to import exams:', error);
+        showError('Failed to import exams: ' + error.message);
         
         // Reset button state on error
         const importBtn = event.target.querySelector('button[type="submit"]');
         if (importBtn) {
-            importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+            importBtn.innerHTML = '<i class="fas fa-file-import"></i> Import Exams';
             importBtn.disabled = false;
         }
     }
-}
-
-async function parseCSVFile(file) {
-    try {
-        const { data, headers } = await parseCSV(file);
-        
-        console.log('Raw CSV data:', data);
-        console.log('CSV headers:', headers);
-        
-        // Validate and filter timetable entries
-        const timetableEntries = data.map((row, index) => {
-            console.log(`Processing row ${index}:`, row);
-            
-            // Convert date format - make sure we're getting the right field and converting properly
-            const rawDate = row.date || row.Date || row['Exam Date'] || '';
-            console.log(`Raw date for row ${index}:`, rawDate);
-            
-            // Use a more robust date conversion function
-            const dateValue = convertToISODate(rawDate);
-            console.log(`Converted date for row ${index}:`, dateValue);
-            
-            const entry = {
-                code: row.code || row.Code || row['Exam Code'] || '',
-                subject: row.subject || row.Subject || row['Subject Name'] || '',
-                date: dateValue,
-                time: row.time || row.Time || row['Exam Time'] || '',
-                status: row.status || row.Status || 'Scheduled'
-            };
-            
-            console.log(`Final entry for row ${index}:`, entry);
-            return entry;
-        }).filter((entry, index) => {
-            const isValid = entry.code && entry.subject && entry.date && entry.time;
-            console.log(`Entry ${index} is valid:`, isValid, 'Entry:', entry);
-            return isValid;
-        });
-        
-        console.log('Final parsed timetable entries:', timetableEntries);
-        
-        // Double-check the dates in the final entries
-        timetableEntries.forEach((entry, index) => {
-            console.log(`Final entry ${index} date:`, entry.date);
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            console.log(`Final entry ${index} date format is correct:`, dateRegex.test(entry.date));
-        });
-        
-        return timetableEntries;
-    } catch (error) {
-        console.error('Error in parseCSVFile:', error);
-        throw new Error(`Failed to parse timetable CSV: ${error.message}`);
-    }
-}
-
-// More robust date conversion function
-function convertToISODate(dateStr) {
-    if (!dateStr) return '';
-    
-    // Trim whitespace
-    dateStr = dateStr.trim();
-    
-    // Check if already in correct format (YYYY-MM-DD)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        return dateStr;
-    }
-    
-    // Handle DD-MM-YYYY or DD/MM/YYYY formats
-    const separators = ['-', '/'];
-    for (const separator of separators) {
-        if (dateStr.includes(separator)) {
-            const parts = dateStr.split(separator);
-            if (parts.length === 3) {
-                const [day, month, year] = parts;
-                
-                // Validate that we have valid numbers
-                if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                    // Ensure day, month, and year are valid with proper padding
-                    const dayNum = parseInt(day, 10);
-                    const monthNum = parseInt(month, 10);
-                    const yearNum = parseInt(year, 10);
-                    
-                    // Validate ranges
-                    if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12 && yearNum >= 1900 && yearNum <= 2100) {
-                        // Format as YYYY-MM-DD with zero-padding
-                        return `${yearNum}-${monthNum.toString().padStart(2, '0')}-${dayNum.toString().padStart(2, '0')}`;
-                    }
-                }
-            }
-        }
-    }
-    
-    // If we can't parse it, try to parse as a Date object and format it correctly
-    const dateObj = new Date(dateStr);
-    if (dateObj instanceof Date && !isNaN(dateObj)) {
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    
-    // If all else fails, return as is
-    return dateStr;
-}
-
-// Export timetable to CSV (deprecated - keeping for backward compatibility)
-// function exportTimetable() {
-//     try {
-//         // Generate CSV content
-//         const csvContent = generateTimetableCSV();
-//         
-//         // Create download link with timestamp
-//         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-//         const filename = `timetable_export_${timestamp}.csv`;
-//         
-//         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-//         const url = URL.createObjectURL(blob);
-//         const link = document.createElement('a');
-//         link.setAttribute('href', url);
-//         link.setAttribute('download', filename);
-//         link.style.visibility = 'hidden';
-//         document.body.appendChild(link);
-//         link.click();
-//         document.body.removeChild(link);
-//         
-//         showSuccess('Timetable exported successfully');
-//     } catch (error) {
-//         console.error('Failed to export timetable:', error);
-//         showError('Failed to export timetable: ' + error.message);
-//     }
-// }
-
-function generateTimetableCSV() {
-    // Prepare data for CSV with better formatting
-    const csvData = timetableData.map(entry => ({
-        "Exam Code": entry.code,
-        "Subject": entry.subject,
-        "Date": entry.date,
-        "Time": entry.time,
-        "Status": entry.status,
-        "ID": entry._id
-    }));
-    
-    // Use the enhanced CSV generator from utils.js
-    return generateCSV(csvData, ['Exam Code', 'Subject', 'Date', 'Time', 'Status', 'ID']);
-}
-
-function downloadCSV(content, filename) {
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
 async function updateStats() {

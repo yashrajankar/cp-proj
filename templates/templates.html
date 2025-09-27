@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV & Excel Templates - AICN Admin</title>
+    <link rel="stylesheet" href="../admin.css">
+    <link rel="stylesheet" href="templates.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="toastContainer" aria-live="polite"></div>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="../admin-features/dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="../admin-features/timetable/timetable.html"><i class="fas fa-calendar-alt"></i> Timetable</a></li>
+                <li><a href="../admin-features/students/students.html"><i class="fas fa-users"></i> Students</a></li>
+                <li><a href="../admin-features/room/room.html"><i class="fas fa-door-open"></i> Rooms</a></li>
+                <li><a href="../admin-features/staff/staff.html"><i class="fas fa-user-tie"></i> Staff</a></li>
+                <li><a href="../admin-features/notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="templates.html" class="active"><i class="fas fa-file-csv"></i> Templates</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-file-csv"></i> CSV & Excel Templates</h1>
+                <div class="user-info">
+                    <span id="currentDateTime"></span>
+                    <span>Admin</span>
+                    <i class="fas fa-user-circle"></i>
+                    <button id="logoutBtn" class="btn btn-secondary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="welcome-section">
+                    <h2>Download Templates</h2>
+                    <p>Use these templates to import data into the system. Templates are available in both CSV and Excel formats.</p>
+                </div>
+
+                <!-- Templates Grid -->
+                <div class="dashboard-grid">
+                    <!-- Students Template -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-users"></i>
+                            <h3>Students Template</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Template for importing student data including roll numbers, names, sections, and contact information.</p>
+                            <div class="template-info">
+                                <strong>Required Columns:</strong>
+                                <ul>
+                                    <li>Roll No</li>
+                                    <li>Name</li>
+                                    <li>Section</li>
+                                    <li>Email</li>
+                                    <li>Phone</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="students-template.csv" class="btn btn-primary" download>
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </a>
+                            <a href="students-template.xlsx" class="btn btn-secondary" download>
+                                <i class="fas fa-file-excel"></i> Download Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Rooms Template -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-door-open"></i>
+                            <h3>Rooms Template</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Template for importing room data including room numbers, buildings, and capacity information.</p>
+                            <div class="template-info">
+                                <strong>Required Columns:</strong>
+                                <ul>
+                                    <li>Room Number</li>
+                                    <li>Building</li>
+                                    <li>Capacity</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="rooms-template.csv" class="btn btn-primary" download>
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </a>
+                            <a href="rooms-template.xlsx" class="btn btn-secondary" download>
+                                <i class="fas fa-file-excel"></i> Download Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Staff Template -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>Staff Template</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Template for importing staff data including names, departments, roles, and contact information.</p>
+                            <div class="template-info">
+                                <strong>Required Columns:</strong>
+                                <ul>
+                                    <li>Name</li>
+                                    <li>Department</li>
+                                    <li>Role</li>
+                                    <li>Email</li>
+                                    <li>Phone</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="staff-template.csv" class="btn btn-primary" download>
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </a>
+                            <a href="staff-template.xlsx" class="btn btn-secondary" download>
+                                <i class="fas fa-file-excel"></i> Download Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Timetable Template -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>Timetable Template</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Template for importing timetable data including subjects, dates, times, and room assignments.</p>
+                            <div class="template-info">
+                                <strong>Required Columns:</strong>
+                                <ul>
+                                    <li>Subject</li>
+                                    <li>Date</li>
+                                    <li>Time</li>
+                                    <li>Room</li>
+                                    <li>Duration</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="timetable-template.csv" class="btn btn-primary" download>
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </a>
+                            <a href="timetable-template.xlsx" class="btn btn-secondary" download>
+                                <i class="fas fa-file-excel"></i> Download Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Template -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-bell"></i>
+                            <h3>Notifications Template</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Template for importing notification data including titles, messages, and dates.</p>
+                            <div class="template-info">
+                                <strong>Required Columns:</strong>
+                                <ul>
+                                    <li>Title</li>
+                                    <li>Message</li>
+                                    <li>Date</li>
+                                    <li>Priority</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="notifications-template.csv" class="btn btn-primary" download>
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </a>
+                            <a href="notifications-template.xlsx" class="btn btn-secondary" download>
+                                <i class="fas fa-file-excel"></i> Download Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Import Instructions</h3>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Download the appropriate template for the data you want to import</li>
+                            <li>Fill in your data following the column structure shown above</li>
+                            <li>Save the file as a CSV or Excel format</li>
+                            <li>Go to the corresponding section in the admin panel</li>
+                            <li>Click the "Import Data" button and select your file</li>
+                            <li>Review the import results and address any errors if necessary</li>
+                        </ol>
+                        <div class="alert alert-info">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                <strong>Important:</strong> Make sure to follow the exact column structure. Any deviation may cause import failures.
+                                Both CSV and Excel formats are supported for all imports.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../utils.js"></script>
+    <script>
+        // Update current date/time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 60000); // Update every minute
+        });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '../index.html';
+        }
+    </script>
+</body>
+</html>

@@ -28,7 +28,7 @@
                 <li><a href="../room/room.html"><i class="fas fa-door-open"></i> Rooms</a></li>
                 <li><a href="../staff/staff.html"><i class="fas fa-user-tie"></i> Staff</a></li>
                 <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="../../templates/index.html"><i class="fas fa-file-csv"></i> CSV Templates</a></li>
+                <li><a href="../../templates/templates.html"><i class="fas fa-file-csv"></i> Templates</a></li>
             </ul>
         </nav>
 
@@ -54,7 +54,7 @@
                             <i class="fas fa-plus"></i> Add Exam
                         </button>
                         <button id="importTimetableBtn" class="btn btn-secondary">
-                            <i class="fas fa-file-import"></i> Import Exams from CSV
+                            <i class="fas fa-file-import"></i> Import Exams
                         </button>
                         <div class="dropdown">
                             <button id="exportTimetableBtn" class="btn btn-secondary dropdown-toggle">
@@ -205,7 +205,7 @@
     <div id="importModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-file-import"></i> Import Exams from CSV</h2>
+                <h2><i class="fas fa-file-import"></i> Import Exams from CSV or Excel</h2>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -213,20 +213,20 @@
                     <div class="form-section">
                         <h3><i class="fas fa-file-csv"></i> Upload CSV File</h3>
                         <div class="form-group">
-                            <label for="csvFile">Select CSV File:</label>
-                            <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
-                            <p class="help-text">Upload a CSV file with exam data. The file should contain columns for Code, Subject, Date, Time, and Status.</p>
+                            <label for="csvFile">Select CSV or Excel File:</label>
+                            <input type="file" id="csvFile" name="csvFile" accept=".csv,.xlsx,.xls" required>
+                            <p class="help-text">Upload a CSV or Excel file with exam data. The file should contain columns for Code, Subject, Date, Time, and Status.</p>
                         </div>
                         <div class="form-group">
                             <label>
                                 <input type="checkbox" id="overwriteData" name="overwriteData"> Overwrite existing data
                             </label>
-                            <p class="help-text">Check this box to replace all existing exam entries with the data from the CSV file.</p>
+                            <p class="help-text">Check this box to replace all existing exam entries with the data from the CSV or Excel file.</p>
                         </div>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Import Data</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-file-import"></i> Import Exams</button>
                     </div>
                 </form>
             </div>

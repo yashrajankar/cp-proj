@@ -19,7 +19,7 @@ function setupEventListeners() {
     // Button event listeners
     const addRoomBtn = document.getElementById('addRoomBtn');
     if (addRoomBtn) {
-        addRoomBtn.addEventListener('click', () => openRoomModal());
+        addRoomBtn.addEventListener('click', () => openAddRoomModal());
     }
     
     const importRoomsBtn = document.getElementById('importRoomsBtn');
@@ -570,7 +570,7 @@ async function handleImportSubmit(event) {
         const overwriteData = formData.get('overwriteData') === 'on';
         
         if (!file) {
-            showToast('No file selected. Please choose a CSV file to import.', 'error');
+            showToast('No file selected. Please choose a CSV or Excel file to import.', 'error');
             // Add visual feedback to highlight the file input
             const fileInput = document.getElementById('csvFile');
             if (fileInput) {
@@ -588,10 +588,22 @@ async function handleImportSubmit(event) {
         }
         
         // Check file type
-        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            showToast('Please select a valid CSV file.', 'error');
+        let fileData;
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            // Parse CSV file
+            fileData = await parseCSV(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                   file.type === 'application/vnd.ms-excel' || 
+                   file.name.endsWith('.xlsx') || 
+                   file.name.endsWith('.xls')) {
+            // Parse Excel file
+            fileData = await parseExcel(file);
+        } else {
+            showToast('Please select a valid CSV or Excel file.', 'error');
             return;
         }
+        
+        console.log('Raw file data:', fileData);
         
         // Show loading state
         const importBtn = event.target.querySelector('button[type="submit"]');
@@ -599,12 +611,8 @@ async function handleImportSubmit(event) {
         importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
         importBtn.disabled = true;
         
-        // Parse CSV file
-        const csvData = await parseCSV(file);
-        console.log('Raw CSV data:', csvData);
-        
         // Process rooms data
-        const rooms = processRoomsData(csvData.data);
+        const rooms = processRoomsData(fileData.data);
         console.log('Processed rooms:', rooms);
         
         if (rooms.length === 0) {

@@ -628,18 +628,93 @@ function closeImportModalFunc() {
     importModal.style.display = 'none';
 }
 
-// Handle Import Form Submission
+// Parse CSV file for staff data
+async function parseStaffCSVFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target.result;
+                // Handle different line endings (Windows \r\n, Unix \n, Mac \r)
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                
+                if (lines.length === 0) {
+                    reject(new Error('CSV file is empty'));
+                    return;
+                }
+                
+                const headers = lines[0].split(',').map(h => h.trim().replace(/["']+/g, ''));
+                
+                const staff = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    // Handle quoted values that may contain commas
+                    const values = parseCSVLine(lines[i]);
+                    const staffMember = {};
+                    
+                    headers.forEach((header, index) => {
+                        // Clean value by trimming whitespace and removing quotes and trailing carriage returns
+                        const value = values[index] ? values[index].trim().replace(/["']+/g, '').replace(/\r$/, '') : '';
+                        switch (header.toLowerCase()) {
+                            case 'name':
+                            case 'staff name':
+                            case 'full name':
+                                staffMember.name = value;
+                                break;
+                            case 'department':
+                            case 'dept':
+                                staffMember.department = value;
+                                break;
+                            case 'email':
+                            case 'email address':
+                                staffMember.email = value;
+                                break;
+                            case 'phone':
+                            case 'phone number':
+                            case 'mobile':
+                                staffMember.phone = value;
+                                break;
+                            case 'availability':
+                                staffMember.availability = value || 'Yes';
+                                break;
+                        }
+                    });
+                    
+                    // Only add if we have required fields (name, department, email, phone)
+                    if (staffMember.name && staffMember.department && staffMember.email && staffMember.phone) {
+                        // Validate availability value
+                        if (staffMember.availability && !['Yes', 'No'].includes(staffMember.availability)) {
+                            staffMember.availability = 'Yes'; // Default to available
+                        }
+                        staff.push(staffMember);
+                    }
+                }
+                
+                resolve(staff);
+            } catch (error) {
+                reject(new Error(`Failed to parse CSV: ${error.message}`));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
+// Handle staff import submission
 async function handleImportSubmit(event) {
     event.preventDefault();
     
     try {
-        const formData = new FormData(event.target);
-        const file = formData.get('csvFile');
+        const form = event.target;
+        const formData = new FormData(form);
+        const fileInput = form.querySelector('#csvFile');
+        const file = fileInput ? fileInput.files[0] : null;
         // Fix checkbox handling - it returns "on" when checked, null when unchecked
         const overwriteData = formData.get('overwriteData') === 'on';
         
         if (!file) {
-            showToast('No file selected. Please choose a CSV file to import.', 'error');
+            showError('No file selected. Please choose a CSV or Excel file to import.');
             // Add visual feedback to highlight the file input
             const fileInput = document.getElementById('csvFile');
             if (fileInput) {
@@ -656,39 +731,123 @@ async function handleImportSubmit(event) {
             return;
         }
         
-        const parsedData = await parseCSVFile(file);
-        console.log('Parsed staff:', parsedData);
+        // Check file type
+        let staffData;
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            // Parse CSV file
+            staffData = await parseStaffCSVFile(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                   file.type === 'application/vnd.ms-excel' || 
+                   file.name.endsWith('.xlsx') || 
+                   file.name.endsWith('.xls')) {
+            // Parse Excel file
+            const fileData = await parseExcel(file);
+            staffData = fileData.data.map(row => {
+                const staffMember = {};
+                
+                // Map headers to staff member properties
+                Object.keys(row).forEach(header => {
+                    const value = row[header] ? String(row[header]).trim().replace(/\r$/, '') : '';
+                    switch (header.toLowerCase()) {
+                        case 'name':
+                        case 'staff name':
+                        case 'full name':
+                            staffMember.name = value;
+                            break;
+                        case 'department':
+                        case 'dept':
+                            staffMember.department = value;
+                            break;
+                        case 'email':
+                        case 'email address':
+                            staffMember.email = value;
+                            break;
+                        case 'phone':
+                        case 'phone number':
+                        case 'mobile':
+                            staffMember.phone = value;
+                            break;
+                        case 'availability':
+                            staffMember.availability = value || 'Yes';
+                            break;
+                    }
+                });
+                
+                return staffMember;
+            }).filter(s => s.name && s.department && s.email && s.phone); // Filter out invalid staff members
+        } else {
+            showError('Please select a valid CSV or Excel file.');
+            return;
+        }
         
-        if (parsedData.length === 0) {
-            showToast('No valid staff found in the file', 'error');
+        // Show loading state
+        const importBtn = event.target.querySelector('button[type="submit"]');
+        const originalBtnText = importBtn.innerHTML;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+        importBtn.disabled = true;
+        
+        console.log('Parsed staff:', staffData);
+        
+        if (staffData.length === 0) {
+            showError('No valid staff members found in the file. Please check the file format and try again.');
+            importBtn.innerHTML = originalBtnText;
+            importBtn.disabled = false;
+            return;
+        }
+        
+        // Validate that we have at least some staff with required fields
+        const validStaff = staffData.filter(s => s.name && s.department && s.email && s.phone);
+        if (validStaff.length === 0) {
+            showError('No staff members with required fields (Name, Department, Email, Phone) found in the file.');
+            importBtn.innerHTML = originalBtnText;
+            importBtn.disabled = false;
             return;
         }
         
         if (overwriteData) {
             // Clear existing data first if overwrite is selected
-            await fetchData('/api/staff', {
+            await fetchData('staff', {
                 method: 'DELETE'
             });
         }
         
         // Add staff to the database
         // Use bulk import endpoint for better performance
-        await fetchData('/api/staff/bulk', {
+        const result = await fetchData('staff/bulk', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(parsedData)  // Send the array directly, not wrapped in an object
+            body: JSON.stringify(staffData)
         });
         
-        closeImportModalFunc();
+        closeModal();
         await loadStaffData();
         updateStats();
         
-        showToast(`Staff imported successfully (${parsedData.length} staff members)`, 'success');
+        // Show detailed success message
+        const successCount = result.results ? result.results.filter(r => r.success).length : staffData.length;
+        const failedCount = result.results ? result.results.filter(r => !r.success).length : 0;
+        
+        if (failedCount > 0) {
+            showWarning(`Staff import completed: ${successCount} successful, ${failedCount} failed. Check the console for details.`);
+        } else {
+            showSuccess(`Staff imported successfully (${successCount} staff members)`);
+        }
+        
+        // Reset button state
+        importBtn.innerHTML = originalBtnText;
+        importBtn.disabled = false;
     } catch (error) {
         console.error('Failed to import staff:', error);
-        showToast(`Failed to import staff: ${error.message}`, 'error');
+        showError('Failed to import staff: ' + error.message);
+        
+        // Reset button state on error
+        const importBtn = event.target.querySelector('button[type="submit"]');
+        if (importBtn) {
+            importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Staff';
+            importBtn.disabled = false;
+        }
     }
 }
 

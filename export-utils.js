@@ -58,34 +58,29 @@ function exportToPDF(options) {
                     fontSize: 22,
                     bold: true,
                     margin: [0, 0, 0, 10],
-                    color: '#2c3e50',
-                    font: 'Roboto'  // Use Roboto instead of Helvetica
+                    color: '#2c3e50'
                 },
                 subheader: {
                     fontSize: 12,
                     bold: true,
                     margin: [0, 5, 0, 15],
-                    color: '#7f8c8d',
-                    font: 'Roboto'  // Use Roboto instead of Helvetica
+                    color: '#7f8c8d'
                 },
                 metadata: {
                     fontSize: 10,
                     italics: true,
-                    color: '#95a5a6',
-                    font: 'Roboto'  // Use Roboto instead of Helvetica
+                    color: '#95a5a6'
                 },
                 tableHeader: {
                     bold: true,
                     fontSize: 10,
                     color: '#ffffff',
                     fillColor: '#3498db',
-                    alignment: 'center',
-                    font: 'Roboto'  // Use Roboto instead of Helvetica
+                    alignment: 'center'
                 },
                 tableCell: {
                     fontSize: 9,
-                    color: '#2c3e50',
-                    font: 'Roboto'  // Use Roboto instead of Helvetica
+                    color: '#2c3e50'
                 },
                 tableAltRow: {
                     fillColor: '#f8f9fa'
@@ -93,8 +88,7 @@ function exportToPDF(options) {
             },
             defaultStyle: {
                 fontSize: 9,
-                color: '#34495e',
-                font: 'Roboto'  // Use Roboto instead of Helvetica
+                color: '#34495e'
             }
         };
         
@@ -197,8 +191,7 @@ function exportToPDF(options) {
                             bold: true,
                             color: '#2c3e50',
                             alignment: 'center',
-                            margin: [0, 15, 0, 0],
-                            font: 'Roboto'  // Use Roboto instead of Helvetica
+                            margin: [0, 15, 0, 0]
                         }
                     ],
                     margin: [40, 20, 40, 0]
@@ -213,8 +206,7 @@ function exportToPDF(options) {
             color: '#e0e0e0',
             opacity: 0.3,
             bold: true,
-            angle: 45,
-            font: 'Roboto'  // Use Roboto instead of Helvetica
+            angle: 45
         };
         
         // Generate and download PDF with better error handling

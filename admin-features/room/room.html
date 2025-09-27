@@ -30,12 +30,12 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="../dashboard/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="../timetable/timetable.html"><i class="fas fa-calendar-alt"></i> Timetable</a></li>
+                <li><a href="../timetable/timetable.html"><i class="fas fa-calendar-alt"></i> Exam Management</a></li>
                 <li><a href="../students/students.html"><i class="fas fa-users"></i> Students</a></li>
                 <li><a href="room.html" class="active"><i class="fas fa-door-open"></i> Rooms</a></li>
                 <li><a href="../staff/staff.html"><i class="fas fa-user-tie"></i> Staff</a></li>
                 <li><a href="../notifications/notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="../../templates/index.html"><i class="fas fa-file-csv"></i> CSV Templates</a></li>
+                <li><a href="../../templates/templates.html"><i class="fas fa-file-csv"></i> Templates</a></li>
             </ul>
         </nav>
 
@@ -61,7 +61,7 @@
                             <i class="fas fa-plus-circle"></i> Add Room
                         </button>
                         <button id="importRoomsBtn" class="btn btn-secondary">
-                            <i class="fas fa-file-import"></i> Import CSV
+                            <i class="fas fa-file-import"></i> Import Data
                         </button>
                         <div class="dropdown">
                             <button id="exportRoomsBtn" class="btn btn-secondary dropdown-toggle">
@@ -229,15 +229,22 @@
     <div id="importModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-file-import"></i> Import Rooms from CSV</h2>
+                <h2><i class="fas fa-file-import"></i> Import Rooms from CSV or Excel</h2>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="importForm">
                     <div class="form-group">
-                        <label for="csvFile"><i class="fas fa-file-csv"></i> Select CSV File</label>
-                        <input type="file" id="csvFile" accept=".csv" required>
-                        <p class="form-help">CSV file should contain columns: Room Number, Building, Capacity</p>
+                        <label for="csvFile"><i class="fas fa-file-csv"></i> Select CSV or Excel File</label>
+                        <input type="file" id="csvFile" name="csvFile" accept=".csv,.xlsx,.xls" required>
+                        <p class="form-help">CSV or Excel file should contain columns: Room Number, Building, Capacity</p>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="overwriteData" name="overwriteData">
+                            <i class="fas fa-exclamation-triangle"></i> Overwrite existing data
+                        </label>
+                        <p class="form-help">Check this box to replace all existing room entries with the data from the CSV file.</p>
                     </div>
                     <div class="form-group" style="display: flex; gap: var(--space-3); justify-content: flex-end;">
                         <button type="button" id="cancelImportBtn" class="btn btn-secondary">

@@ -1216,13 +1216,15 @@ async function handleImportSubmit(event) {
     event.preventDefault();
     
     try {
-        const formData = new FormData(event.target);
-        const file = formData.get('csvFile');
+        const form = event.target;
+        const formData = new FormData(form);
+        const fileInput = form.querySelector('#csvFile');
+        const file = fileInput ? fileInput.files[0] : null;
         // Fix checkbox handling - it returns "on" when checked, null when unchecked
         const overwriteData = formData.get('overwriteData') === 'on';
         
         if (!file) {
-            showError('No file selected. Please choose a CSV file to import.');
+            showError('No file selected. Please choose a CSV or Excel file to import.');
             // Add visual feedback to highlight the file input
             const fileInput = document.getElementById('csvFile');
             if (fileInput) {
@@ -1240,8 +1242,53 @@ async function handleImportSubmit(event) {
         }
         
         // Check file type
-        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            showError('Please select a valid CSV file.');
+        let studentsData;
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+            // Parse CSV file
+            studentsData = await parseCSVFile(file);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                   file.type === 'application/vnd.ms-excel' || 
+                   file.name.endsWith('.xlsx') || 
+                   file.name.endsWith('.xls')) {
+            // Parse Excel file
+            const fileData = await parseExcel(file);
+            studentsData = fileData.data.map(row => {
+                const student = {};
+                
+                // Map headers to student properties
+                Object.keys(row).forEach(header => {
+                    const value = row[header] ? String(row[header]).trim().replace(/\r$/, '') : '';
+                    switch (header.toLowerCase()) {
+                        case 'roll no':
+                        case 'rollno':
+                        case 'roll number':
+                            student.rollNo = value;
+                            break;
+                        case 'name':
+                        case 'full name':
+                        case 'student name':
+                            student.name = value;
+                            break;
+                        case 'section':
+                        case 'class':
+                            student.section = value;
+                            break;
+                        case 'email':
+                        case 'email address':
+                            student.email = value;
+                            break;
+                        case 'phone':
+                        case 'phone number':
+                        case 'mobile':
+                            student.phone = value;
+                            break;
+                    }
+                });
+                
+                return student;
+            }).filter(s => s.rollNo && s.name && s.section); // Filter out invalid students
+        } else {
+            showError('Please select a valid CSV or Excel file.');
             return;
         }
         
@@ -1251,10 +1298,9 @@ async function handleImportSubmit(event) {
         importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
         importBtn.disabled = true;
         
-        const students = await parseCSVFile(file);
-        console.log('Parsed students:', students);
+        console.log('Parsed students:', studentsData);
         
-        if (students.length === 0) {
+        if (studentsData.length === 0) {
             showError('No valid students found in the file. Please check the file format and try again.');
             importBtn.innerHTML = originalBtnText;
             importBtn.disabled = false;
@@ -1262,7 +1308,7 @@ async function handleImportSubmit(event) {
         }
         
         // Validate that we have at least some students with required fields
-        const validStudents = students.filter(s => s.rollNo && s.name && s.section);
+        const validStudents = studentsData.filter(s => s.rollNo && s.name && s.section);
         if (validStudents.length === 0) {
             showError('No students with required fields (RollNo, Name, Section) found in the file.');
             importBtn.innerHTML = originalBtnText;
@@ -1284,7 +1330,7 @@ async function handleImportSubmit(event) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(students)
+            body: JSON.stringify(studentsData)
         });
         
         closeModal();
@@ -1292,7 +1338,7 @@ async function handleImportSubmit(event) {
         updateStats();
         
         // Show detailed success message
-        const successCount = result.results ? result.results.filter(r => r.success).length : students.length;
+        const successCount = result.results ? result.results.filter(r => r.success).length : studentsData.length;
         const failedCount = result.results ? result.results.filter(r => !r.success).length : 0;
         
         if (failedCount > 0) {
@@ -1311,7 +1357,7 @@ async function handleImportSubmit(event) {
         // Reset button state on error
         const importBtn = event.target.querySelector('button[type="submit"]');
         if (importBtn) {
-            importBtn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+            importBtn.innerHTML = '<i class="fas fa-file-import"></i> Import Students';
             importBtn.disabled = false;
         }
     }
