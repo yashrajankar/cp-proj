@@ -10,7 +10,7 @@
     <title>AICN Examination Management System</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
@@ -53,7 +53,7 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease; /* Faster transition */
         }
 
         .loader {
@@ -66,7 +66,7 @@
             height: 40px;
             background: var(--accent-color);
             border-radius: 4px;
-            animation: scaleUpDown 1.2s infinite ease-in-out;
+            animation: scaleUpDown 1s infinite ease-in-out; /* Faster animation */
         }
 
         .line:nth-child(2) {
@@ -616,7 +616,7 @@
                         User Login
                     </button>   
                 </div>
-                <img src="Images/Logo/Privacy-policy-rafiki.png" class="image" alt="" width="50" />
+                <!-- Image placeholder removed to prevent 404 errors -->
             </div>
             <div class="panel right-panel">
                 <div class="content">
@@ -626,7 +626,7 @@
                         Admin Login
                     </button>
                 </div>
-                <img src="Images/Logo/Mobile-login-rafiki.png" class="image" alt="" />
+                <!-- Image placeholder removed to prevent 404 errors -->
             </div>
         </div>
     </div>
@@ -639,7 +639,10 @@
         window.addEventListener("load", function () {
             const loader = document.getElementById("loaderNew");
             if (loader) {
-                loader.classList.add("hidden");
+                // Add a small delay to ensure smooth transition
+                setTimeout(() => {
+                    loader.classList.add("hidden");
+                }, 100);
             }
         });
 

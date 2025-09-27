@@ -1177,6 +1177,362 @@ class DatabaseService {
     }
   }
 
+  // Results operations
+  async getResults(searchTerm = null, examCodeFilter = null, sectionFilter = null) {
+    let query = `
+      SELECT 
+        r.id as _id, 
+        r.studentId, 
+        r.examCode, 
+        r.subject, 
+        r.marksObtained, 
+        r.totalMarks, 
+        r.grade, 
+        r.remarks, 
+        r.examDate,
+        s.rollNo,
+        s.name as studentName,
+        s.section
+      FROM results r
+      JOIN students s ON r.studentId = s.id
+    `;
+    
+    const params = [];
+    const conditions = [];
+    
+    // Add filtering conditions
+    if (searchTerm) {
+      conditions.push('(s.rollNo LIKE ? OR s.name LIKE ? OR r.subject LIKE ?)');
+      const searchPattern = `%${searchTerm}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+    
+    if (examCodeFilter) {
+      conditions.push('r.examCode = ?');
+      params.push(examCodeFilter);
+    }
+    
+    if (sectionFilter) {
+      conditions.push('s.section = ?');
+      params.push(sectionFilter);
+    }
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY r.examDate DESC, s.rollNo';
+    
+    try {
+      const results = await this.executeQuery(query, params);
+      return results;
+    } catch (error) {
+      console.error('Error in getResults:', error);
+      throw error;
+    }
+  }
+
+  async getResultById(id) {
+    try {
+      const query = `
+        SELECT 
+          r.id as _id, 
+          r.studentId, 
+          r.examCode, 
+          r.subject, 
+          r.marksObtained, 
+          r.totalMarks, 
+          r.grade, 
+          r.remarks, 
+          r.examDate,
+          s.rollNo,
+          s.name as studentName,
+          s.section
+        FROM results r
+        JOIN students s ON r.studentId = s.id
+        WHERE r.id = ?
+      `;
+      const rows = await this.executeQuery(query, [id]);
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      console.error('Error in getResultById:', error);
+      throw error;
+    }
+  }
+
+  async getResultByStudentIdAndExamCode(studentId, examCode) {
+    try {
+      const query = `
+        SELECT 
+          r.id as _id, 
+          r.studentId, 
+          r.examCode, 
+          r.subject, 
+          r.marksObtained, 
+          r.totalMarks, 
+          r.grade, 
+          r.remarks, 
+          r.examDate,
+          s.rollNo,
+          s.name as studentName,
+          s.section
+        FROM results r
+        JOIN students s ON r.studentId = s.id
+        WHERE r.studentId = ? AND r.examCode = ?
+      `;
+      const rows = await this.executeQuery(query, [studentId, examCode]);
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      console.error('Error in getResultByStudentIdAndExamCode:', error);
+      throw error;
+    }
+  }
+
+  async createResult(result) {
+    try {
+      const { studentId, examCode, subject, marksObtained, totalMarks, grade, remarks, examDate } = result;
+      
+      // Check if result already exists for this student and exam
+      const existingResult = await this.getResultByStudentIdAndExamCode(studentId, examCode);
+      if (existingResult) {
+        throw new Error('Result for this student and exam already exists');
+      }
+      
+      const query = `
+        INSERT INTO results 
+        (studentId, examCode, subject, marksObtained, totalMarks, grade, remarks, examDate) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      const resultObj = await this.executeQuery(query, [
+        studentId, 
+        examCode, 
+        subject, 
+        marksObtained !== undefined && marksObtained !== null ? marksObtained : null, 
+        totalMarks, 
+        grade || null, 
+        remarks || null, 
+        examDate || null
+      ]);
+      return resultObj;
+    } catch (error) {
+      console.error('Error in createResult:', error);
+      // Handle duplicate entry error
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new Error('Result for this student and exam already exists');
+      }
+      throw error;
+    }
+  }
+
+  async updateResult(id, result) {
+    try {
+      const { studentId, examCode, subject, marksObtained, totalMarks, grade, remarks, examDate } = result;
+      const query = `
+        UPDATE results SET 
+          studentId = ?, 
+          examCode = ?, 
+          subject = ?, 
+          marksObtained = ?, 
+          totalMarks = ?, 
+          grade = ?, 
+          remarks = ?, 
+          examDate = ? 
+        WHERE id = ?
+      `;
+      const resultObj = await this.executeQuery(query, [
+        studentId, 
+        examCode, 
+        subject, 
+        marksObtained !== undefined && marksObtained !== null ? marksObtained : null, 
+        totalMarks, 
+        grade || null, 
+        remarks || null, 
+        examDate || null,
+        id
+      ]);
+      return resultObj;
+    } catch (error) {
+      console.error('Error in updateResult:', error);
+      throw error;
+    }
+  }
+
+  async deleteResult(id) {
+    try {
+      const query = 'DELETE FROM results WHERE id = ?';
+      const result = await this.executeQuery(query, [id]);
+      return result;
+    } catch (error) {
+      console.error('Error in deleteResult:', error);
+      throw error;
+    }
+  }
+
+  async clearResults() {
+    try {
+      const query = 'DELETE FROM results';
+      const result = await this.executeQuery(query);
+      return result;
+    } catch (error) {
+      console.error('Error in clearResults:', error);
+      throw error;
+    }
+  }
+
+  // Attendance operations
+  async getAttendance(searchTerm = null, dateFilter = null, subjectFilter = null, sectionFilter = null) {
+    let query = `
+      SELECT 
+        a.id as _id, 
+        a.date, 
+        a.subject, 
+        a.studentId, 
+        a.status, 
+        a.notes,
+        s.rollNo,
+        s.name as studentName,
+        s.section
+      FROM attendance a
+      JOIN students s ON a.studentId = s.id
+    `;
+    
+    const params = [];
+    const conditions = [];
+    
+    // Add filtering conditions
+    if (searchTerm) {
+      conditions.push('(s.rollNo LIKE ? OR s.name LIKE ? OR a.subject LIKE ?)');
+      const searchPattern = `%${searchTerm}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+    
+    if (dateFilter) {
+      conditions.push('a.date = ?');
+      params.push(dateFilter);
+    }
+    
+    if (subjectFilter) {
+      conditions.push('a.subject = ?');
+      params.push(subjectFilter);
+    }
+    
+    if (sectionFilter) {
+      conditions.push('s.section = ?');
+      params.push(sectionFilter);
+    }
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY a.date DESC, s.rollNo';
+    
+    try {
+      const results = await this.executeQuery(query, params);
+      return results;
+    } catch (error) {
+      console.error('Error in getAttendance:', error);
+      throw error;
+    }
+  }
+
+  async getAttendanceById(id) {
+    try {
+      const query = `
+        SELECT 
+          a.id as _id, 
+          a.date, 
+          a.subject, 
+          a.studentId, 
+          a.status, 
+          a.notes,
+          s.rollNo,
+          s.name as studentName,
+          s.section
+        FROM attendance a
+        JOIN students s ON a.studentId = s.id
+        WHERE a.id = ?
+      `;
+      const rows = await this.executeQuery(query, [id]);
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      console.error('Error in getAttendanceById:', error);
+      throw error;
+    }
+  }
+
+  async createAttendance(attendance) {
+    try {
+      const { date, subject, studentId, status, notes } = attendance;
+      
+      const query = `
+        INSERT INTO attendance 
+        (date, subject, studentId, status, notes) 
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      const result = await this.executeQuery(query, [
+        date, 
+        subject, 
+        studentId, 
+        status, 
+        notes || null
+      ]);
+      return result;
+    } catch (error) {
+      console.error('Error in createAttendance:', error);
+      throw error;
+    }
+  }
+
+  async updateAttendance(id, attendance) {
+    try {
+      const { date, subject, studentId, status, notes } = attendance;
+      const query = `
+        UPDATE attendance SET 
+          date = ?, 
+          subject = ?, 
+          studentId = ?, 
+          status = ?, 
+          notes = ? 
+        WHERE id = ?
+      `;
+      const result = await this.executeQuery(query, [
+        date, 
+        subject, 
+        studentId, 
+        status, 
+        notes || null,
+        id
+      ]);
+      return result;
+    } catch (error) {
+      console.error('Error in updateAttendance:', error);
+      throw error;
+    }
+  }
+
+  async deleteAttendance(id) {
+    try {
+      const query = 'DELETE FROM attendance WHERE id = ?';
+      const result = await this.executeQuery(query, [id]);
+      return result;
+    } catch (error) {
+      console.error('Error in deleteAttendance:', error);
+      throw error;
+    }
+  }
+
+  async clearAttendance() {
+    try {
+      const query = 'DELETE FROM attendance';
+      const result = await this.executeQuery(query);
+      return result;
+    } catch (error) {
+      console.error('Error in clearAttendance:', error);
+      throw error;
+    }
+  }
+
 }
 
 module.exports = new DatabaseService();

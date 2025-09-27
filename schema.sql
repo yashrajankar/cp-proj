@@ -24,14 +24,15 @@ SHOW DATABASES LIKE 'aicn_app_db';
 SELECT User, Host FROM mysql.user WHERE User = 'aicn_user';
 
 -- End of setup
-```
 
-```
 -- schema.sql
 -- Unified database schema for AICN application
 
 -- Drop existing tables if they exist to start fresh
+-- Need to drop in correct order due to foreign key constraints
 DROP TABLE IF EXISTS `assigned_classrooms`;
+DROP TABLE IF EXISTS `attendance`;
+DROP TABLE IF EXISTS `results`;
 DROP TABLE IF EXISTS `classroom_assignments`;
 DROP TABLE IF EXISTS `login`;
 DROP TABLE IF EXISTS `seating_plans`;
@@ -44,9 +45,6 @@ DROP TABLE IF EXISTS `rooms`;
 DROP TABLE IF EXISTS `students`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `sessions`;
-DROP TABLE IF EXISTS `assigned_classrooms`;
-DROP TABLE IF EXISTS `classroom_assignments`;
-DROP TABLE IF EXISTS `login`;
 
 -- Create students table
 CREATE TABLE IF NOT EXISTS `students` (
@@ -94,6 +92,18 @@ CREATE TABLE IF NOT EXISTS `seating_plans` (
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_exam` (`examDate`, `examCode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create timetables table
+CREATE TABLE IF NOT EXISTS `timetables` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `code` VARCHAR(20) NOT NULL UNIQUE,
+  `subject` VARCHAR(100) NOT NULL,
+  `date` DATE NOT NULL,
+  `time` VARCHAR(50) NOT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'Scheduled',
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create staff table
@@ -234,4 +244,15 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Indexes for better query performance
-CREATE INDEX IF NOT EXISTS
+CREATE INDEX IF NOT EXISTS idx_students_rollno ON students(rollNo);
+CREATE INDEX IF NOT EXISTS idx_students_section ON students(section);
+CREATE INDEX IF NOT EXISTS idx_results_student_id ON results(studentId);
+CREATE INDEX IF NOT EXISTS idx_results_exam_code ON results(examCode);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date);
+CREATE INDEX IF NOT EXISTS idx_attendance_student_id ON attendance(studentId);
+CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications(status);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(createdAt);
+CREATE INDEX IF NOT EXISTS idx_timetables_date ON timetables(date);
+CREATE INDEX IF NOT EXISTS idx_timetables_code ON timetables(code);
+CREATE INDEX IF NOT EXISTS idx_seating_plans_exam_date ON seating_plans(examDate);
+CREATE INDEX IF NOT EXISTS idx_seating_plans_exam_code ON seating_plans(examCode);

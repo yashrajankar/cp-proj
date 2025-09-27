@@ -3,7 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 // API base URL
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'http://localhost:3003/api';
 
 // Function to parse CSV data
 function parseCsvData(csvText) {

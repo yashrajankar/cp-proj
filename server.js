@@ -21,6 +21,7 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const databaseService = require('./services/databaseService');
 const { testConnection, pool } = require('./config/db');
@@ -45,6 +46,23 @@ const csrfProtection = (req, res, next) => {
   next();
 };
 
+// Authentication middleware
+const authenticateToken = (req, res, next) => {
+  const token = req.cookies.token;
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Access token required' });
+  }
+  
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+  }
+  
+  req.user = decoded;
+  next();
+};
+
 // Password hashing functions
 const hashPassword = async (password) => {
   const saltRounds = 10;
@@ -53,6 +71,21 @@ const hashPassword = async (password) => {
 
 const verifyPassword = async (password, hashedPassword) => {
   return await bcrypt.compare(password, hashedPassword);
+};
+
+// JWT token functions
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
+const generateToken = (payload) => {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+};
+
+const verifyToken = (token) => {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
 };
 
 const app = express();
@@ -635,6 +668,24 @@ app.post('/api/auth/user/login', async (req, res) => {
       });
     }
     
+    // Generate JWT token
+    const token = generateToken({
+      id: student._id,
+      rollNo: student.rollNo,
+      name: student.name,
+      section: student.section,
+      email: student.email,
+      phone: student.phone
+    });
+    
+    // Set HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+    
     // Successful authentication
     res.json({ 
       success: true, 
@@ -655,6 +706,13 @@ app.post('/api/auth/user/login', async (req, res) => {
       message: 'Internal server error' 
     });
   }
+});
+
+// Logout endpoint
+app.post('/api/auth/logout', (req, res) => {
+  // Clear the token cookie
+  res.clearCookie('token');
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 // Get student statistics
@@ -962,6 +1020,21 @@ app.post('/api/auth/admin/login', async (req, res) => {
       });
     }
     
+    // Generate JWT token
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      role: user.role
+    });
+    
+    // Set HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+    
     // Successful authentication
     res.json({ 
       success: true, 
@@ -979,6 +1052,13 @@ app.post('/api/auth/admin/login', async (req, res) => {
       message: 'Internal server error' 
     });
   }
+});
+
+// Logout endpoint
+app.post('/api/auth/logout', (req, res) => {
+  // Clear the token cookie
+  res.clearCookie('token');
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 app.put('/api/timetables/:id', async (req, res) => {

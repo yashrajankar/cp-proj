@@ -181,8 +181,8 @@ async function fetchData(endpoint, options = {}, retries = MAX_RETRIES, backoff 
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const isProduction = !isFileProtocol && !isLocalhost;
         
-        // Use localhost:3000 for API calls since that's what the server is running on
-        const baseURL = 'http://localhost:3000';
+        // Use localhost:3003 for API calls since that's what the server is running on
+        const baseURL = 'http://localhost:3003';
         
         if (endpoint.startsWith('http')) {
             // Full URL - use as is

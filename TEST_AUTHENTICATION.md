@@ -3,7 +3,7 @@
 ## How to Test the Authentication System
 
 ### 1. Access the Application
-Open your browser and navigate to: http://localhost:3001
+Open your browser and navigate to: http://localhost:3003
 
 ### 2. Test Admin Login
 - Click on "Admin Login" tab
@@ -24,7 +24,7 @@ Open your browser and navigate to: http://localhost:3001
 - You should be redirected back to the login page
 
 ### 5. Test Protected Page Access
-- Try to directly access http://localhost:3001/admin.html without logging in
+- Try to directly access http://localhost:3003/admin.html without logging in
 - You should be redirected back to the login page
 
 ## Common Test Cases
@@ -48,7 +48,7 @@ Open your browser and navigate to: http://localhost:3001
 ## Troubleshooting
 
 ### If Login Fails
-1. Check that the server is running on port 3001
+1. Check that the server is running on port 3003
 2. Verify database connection is working
 3. Ensure admin user exists in the database
 4. Check browser console for JavaScript errors

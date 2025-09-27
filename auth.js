@@ -60,14 +60,25 @@ async function login(userType) {
             ? { username, password }
             : { rollNo: username, password };
         
-        // Make API request
-        const response = await fetch(`/api/auth/${userType}/login`, {
+        // Make API request with timeout
+        const apiUrl = `http://localhost:3003/api/auth/${userType}/login`;
+        
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 10000) // 10 second timeout
+        );
+        
+        // Make the actual request
+        const fetchPromise = fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(requestData)
         });
+        
+        // Race the fetch against the timeout
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
         
         // Check if response is OK
         if (!response.ok) {
@@ -101,16 +112,20 @@ async function login(userType) {
             localStorage.setItem('userType', userType);
             localStorage.setItem('userInfo', JSON.stringify(result[userType === 'admin' ? 'user' : 'student']));
             
-            // Redirect based on user type
+            // Redirect based on user type with shorter delay
             setTimeout(() => {
                 window.location.href = userType === 'admin' ? 'admin-features/dashboard/dashboard.html' : 'user-features/dashboard/dashboard.html';
-            }, 1000);
+            }, 500); // Reduced from 1000ms to 500ms
         } else {
             showToast(result.message || 'Login failed', 'error');
         }
     } catch (error) {
         console.error('Login error:', error);
-        showToast('An error occurred during login. Please try again.', 'error');
+        if (error.message === 'Request timeout') {
+            showToast('Login request timed out. Please check your connection and try again.', 'error');
+        } else {
+            showToast('An error occurred during login. Please try again.', 'error');
+        }
     } finally {
         hideLoader();
     }
